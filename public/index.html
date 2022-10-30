@@ -8,6 +8,9 @@
   <script src="/scripts/freet.js"></script>
   <script src="/scripts/user.js"></script>
   <script src="/scripts/index.js"></script>
+  <script src="/scripts/follow.js"></script>
+  <script src="/scripts/favorite.js"></script>
+  <script src="/scripts/friend.js"></script>
 </head>
 
 <body>
@@ -63,6 +66,15 @@
           <input type="submit" value="Change Password">
         </form>
 
+        <form id="change-bio">
+          <h3>Change Bio</h3>
+          <div>
+            <label for="bio">New bio:</label>
+            <input id="bio" name="bio">
+          </div>
+          <input type="submit" value="Change bio">
+        </form>
+
         <form id="sign-in">
           <h3>Sign In</h3>
           <div>
@@ -82,9 +94,9 @@
         </form>
 
         <form id="view-all-freets">
-            <h3>View All Freets</h3>
-            <input type="submit" value="View All Freets">
-          </form>
+          <h3>View All Freets</h3>
+          <input type="submit" value="View All Freets">
+        </form>
 
         <form id="view-freets-by-author">
           <h3>View Freets By Author</h3>
@@ -125,6 +137,88 @@
           </div>
           <input type="submit" value="Delete Freet">
         </form>
+
+        <form id="follow-user">
+          <h3>Follow User</h3>
+          <div>
+            <label for="username">follow:</label>
+            <input id="username" name="username">
+          </div>
+          <input type="submit" value="follow user">
+        </form>
+
+        <form id="unfollow-user">
+          <h3>Unfollow User</h3>
+          <div>
+            <label for="username">unfollow:</label>
+            <input id="username" name="username">
+          </div>
+          <input type="submit" value="unfollow user">
+        </form>
+
+        <form id="favorite-user">
+          <h3>Favorite User</h3>
+          <div>
+            <label for="username">follow:</label>
+            <input id="username" name="username">
+          </div>
+          <input type="submit" value="favorite user">
+        </form>
+
+        <form id="unfavorite-user">
+          <h3>Unfavorite User</h3>
+          <div>
+            <label for="username">unfollow:</label>
+            <input id="username" name="username">
+          </div>
+          <input type="submit" value="unfavorite user">
+        </form>
+
+        <form id="friend-user">
+          <h3>Friend User</h3>
+          <div>
+            <label for="username">follow:</label>
+            <input id="username" name="username">
+          </div>
+          <input type="submit" value="friend user">
+        </form>
+
+        <form id="unfriend-user">
+          <h3>Unfriend User</h3>
+          <div>
+            <label for="username">unfollow:</label>
+            <input id="username" name="username">
+          </div>
+          <input type="submit" value="unfriend user">
+        </form>
+
+        <form id="view-follow-of-user">
+          <h3>View follow By username</h3>
+          <div>
+            <label for="username">username:</label>
+            <input id="username" name="username">
+          </div>
+          <input type="submit" value="View Follow By username">
+        </form>
+
+        <form id="view-favorites-of-user">
+          <h3>View Favorites By username</h3>
+          <div>
+            <label for="username">username:</label>
+            <input id="username" name="username">
+          </div>
+          <input type="submit" value="View Favorites By username">
+        </form>
+
+        <form id="view-friends-of-user">
+          <h3>View Friends By username</h3>
+          <div>
+            <label for="username">username:</label>
+            <input id="username" name="username">
+          </div>
+          <input type="submit" value="View Friends By username">
+        </form>
+
       </div>
     </section>
     <section>

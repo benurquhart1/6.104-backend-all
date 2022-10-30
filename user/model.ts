@@ -11,7 +11,9 @@ export type User = {
   _id: Types.ObjectId; // MongoDB assigns each object this ID on creation
   username: string;
   password: string;
-  dateJoined: Date;
+  birthday: Date;
+  isPublic:Boolean;
+  bio:string;
 };
 
 // Mongoose schema definition for interfacing with a MongoDB table
@@ -28,11 +30,21 @@ const UserSchema = new Schema({
     type: String,
     required: true
   },
-  // The date the user joined
-  dateJoined: {
+  // The user's birthday
+  birthday: {
     type: Date,
     required: true
-  }
+  },
+  // A boolean representing whether the account is public or private
+  isPublic: {
+    type: Boolean,
+    required: true
+  },
+  // The bio for an account
+  bio: {
+    type: String,
+    required: false
+  },
 });
 
 const UserModel = model<User>('User', UserSchema);

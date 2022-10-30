@@ -127,22 +127,23 @@ const isUsernameNotAlreadyInUse = async (req: Request, res: Response, next: Next
 /**
  * Checks if a username in req.body exists
  */
-const isUsernameExistsBody = async (req: Request, res: Response, next: NextFunction) => {
-  isUsernameExists((req.body.username as string) ?? '', res, next);
-};
+ const isUsernameExists = async (username: string, res: Response, next: NextFunction) => {
+  if (!username) {
+    res.status(400).json({
+      error: 'Provided username must be nonempty.'
+    });
+    return;
+  }
 
-/**
- * Checks if a username in req.query exists
- */
- const isUsernameExistsQuery = async (req: Request, res: Response, next: NextFunction) => {
-  isUsernameExists((req.query.username as string) ?? '', res, next);
-};
+  const user = await UserCollection.findOneByUsername(req.query.username as string);
+  if (!user) {
+    res.status(404).json({
+      error: `A user with username ${req.query.username as string} does not exist.`
+    });
+    return;
+  }
 
-/**
- * Checks if a username in req.query exists
- */
- const isUsernameExistsParams = async (req: Request, res: Response, next: NextFunction) => {
-  isUsernameExists((req.params.username as string) ?? '', res, next);
+  next();
 };
 
 /**
@@ -206,8 +207,5 @@ export {
   isAuthorExists,
   isValidUsername,
   isValidPassword,
-  isUsernameExists,
-  isUsernameExistsBody,
-  isUsernameExistsQuery,
-  isUsernameExistsParams
+  isUsernameExists
 };

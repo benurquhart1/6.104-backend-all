@@ -7,6 +7,8 @@ import type {User} from '../user/model';
  * DO NOT implement operations here ---> use collection file
  */
 
+export enum Reaction {like,love,laughing,angry,astonished,sad,happy};
+
 // Type definition for Freet on the backend
 export type Freet = {
   _id: Types.ObjectId; // MongoDB assigns each object this ID on creation
@@ -14,6 +16,8 @@ export type Freet = {
   dateCreated: Date;
   content: string;
   dateModified: Date;
+  views:Array<Types.ObjectId>;
+  reacts:Array<Array<Types.ObjectId>>
 };
 
 export type PopulatedFreet = {
@@ -22,6 +26,7 @@ export type PopulatedFreet = {
   dateCreated: Date;
   content: string;
   dateModified: Date;
+  views:Array<User>;
 };
 
 // Mongoose schema definition for interfacing with a MongoDB table

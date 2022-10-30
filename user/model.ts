@@ -12,7 +12,6 @@ export type User = {
   username: string;
   password: string;
   birthday: Date;
-  isPublic:Boolean;
   bio:string;
 };
 
@@ -33,11 +32,6 @@ const UserSchema = new Schema({
   // The user's birthday
   birthday: {
     type: Date,
-    required: true
-  },
-  // A boolean representing whether the account is public or private
-  isPublic: {
-    type: Boolean,
     required: true
   },
   // The bio for an account

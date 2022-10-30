@@ -4,14 +4,13 @@ import {Schema, model} from 'mongoose';
 import type {User} from '../user/model';
 
 /**
- * This file defines the properties stored in a Feed
+ * This file defines the properties stored in a feed
  * DO NOT implement operations here ---> use collection file
  */
 
-export enum Sort {date= 0, dateReversed, reacts, views, reactsPerView}
+export enum Sort {date= 0, dateReversed, reacts, views, reactsPerView};
 
-}
-// Type definition for Feed on the backend
+// Type definition for feed on the backend
 export type Feed = {
   _id:Types.ObjectId;
   name:string;

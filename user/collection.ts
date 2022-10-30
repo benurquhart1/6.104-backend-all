@@ -16,15 +16,12 @@ class UserCollection {
    *
    * @param {string} username - The username of the user
    * @param {string} password - The password of the user
-   * @param {Date} birthday - The bir   m thday of the user
-   * @param {Boolean} isPublic - A boolen representing whether or not the profile is public
+   * @param {Date} birthday - The birthday of the user
    * @param {string} bio - The user's bio
    * @return {Promise<HydratedDocument<User>>} - The newly created user
    */
-  static async addOne(username: string, password: string, birthday: Date, isPublic:Boolean, bio:string=''): Promise<HydratedDocument<User>> {
-    const dateJoined = new Date();
-
-    const user = new UserModel({username, password, birthday, isPublic, bio});
+  static async addOne(username: string, password: string, birthday: Date, bio:string=''): Promise<HydratedDocument<User>> {
+    const user = new UserModel({username, password, birthday, bio});
     await user.save(); // Saves user to MongoDB
     return user;
   }
@@ -78,6 +75,10 @@ class UserCollection {
 
     if (userDetails.username) {
       user.username = userDetails.username as string;
+    }
+
+    if (userDetails.bio) {
+      user.bio = userDetails.bio as string;
     }
 
     await user.save();

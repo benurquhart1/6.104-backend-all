@@ -71,6 +71,7 @@ router.delete(
  * @param {string} username - username of user
  * @param {string} password - user's password
  * @param {Date} birthday - the user's birthday
+ * @param {string} bio - the user's bio
  * @return {UserResponse} - The created user
  * @throws {403} - If there is a user already logged in
  * @throws {409} - If username is already taken
@@ -102,6 +103,7 @@ router.post(
  *
  * @param {string} username - The user's new username
  * @param {string} password - The user's new password
+ * @param {string} bio - the user's new bio
  * @return {UserResponse} - The updated user
  * @throws {403} - If user is not logged in
  * @throws {409} - If username already taken

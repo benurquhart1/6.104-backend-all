@@ -113,10 +113,10 @@ const isUsernameNotAlreadyInUse = async (req: Request, res: Response, next: Next
     return;
   }
 
-  const user = await UserCollection.findOneByUsername(req.query.username as string);
+  const user = await UserCollection.findOneByUsername(username as string);
   if (!user) {
     res.status(404).json({
-      error: `A user with username ${req.query.username as string} does not exist.`
+      error: `A user with username ${username as string} does not exist.`
     });
     return;
   }

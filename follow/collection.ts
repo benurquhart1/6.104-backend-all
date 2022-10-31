@@ -113,7 +113,7 @@ class FollowCollection {
    * @param {string} followerId - The id of the user that is being followed
    */
   static async checkFololowingByUsername(followingUsername:string, followerId: Types.ObjectId | string): Promise<Boolean> {
-    const followingId = (await UserCollection.findOneByUserId(followingUsername))._id;
+    const followingId = (await UserCollection.findOneByUsername(followingUsername))._id;
     return this.checkFollowingById(followingId,followerId);
   }
 

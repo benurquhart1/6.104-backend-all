@@ -46,8 +46,14 @@ function signOut() {
 }
 
 //follow
-function followUser(fields) {
-  fetch('/api/follow', {method: 'POST', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+// function followUser(fields) {
+//   fetch('/api/follow', {method: 'POST', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+//     .then(showResponse)
+//     .catch(showResponse);
+// }
+
+function followUser() {
+  fetch('/api/freets')
     .then(showResponse)
     .catch(showResponse);
 }

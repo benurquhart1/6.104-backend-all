@@ -57,7 +57,7 @@ class FriendCollection {
    * @param {string} userId - The id of the user that is being Friended
    */
   static async addFriendByUsername(friendUsername: string, userId: Types.ObjectId): Promise<void> {
-    const friendId = (await UserCollection.findOneByUserId(friendUsername))._id
+    const friendId = (await UserCollection.findOneByUsername(friendUsername))._id
     FriendModel.updateOne({userId:userId},{$addToSet: {firends:friendId}});
     FriendModel.updateOne({userId:friendId},{$addToSet: {friendMe:userId}});
   }
@@ -69,7 +69,7 @@ class FriendCollection {
    * @param {string} userId - The id of the user that is being Friended
    */
   static async deleteFriendByUsername(unFriendUsername:string, userId: Types.ObjectId): Promise<void> {
-    const unFriendId = (await UserCollection.findOneByUserId(unFriendUsername))._id;
+    const unFriendId = (await UserCollection.findOneByUsername(unFriendUsername))._id;
     FriendModel.updateOne({userId:userId},{$pull: {firends:unFriendId}});
     FriendModel.updateOne({userId:unFriendId},{$pull: {friendMe:userId}});
   }

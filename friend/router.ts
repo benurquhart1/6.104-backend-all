@@ -41,11 +41,11 @@ router.get(
  */
 router.post(
   '/',
-  // [
-  //   userValidator.isUserLoggedIn,
-  //   userValidator.isUsernameExistsBody,
-  //   friendValidator.isNotFriending,
-  // ],
+  [
+    userValidator.isUserLoggedIn,
+    userValidator.isUsernameExistsBody,
+    // friendValidator.isNotFriending,
+  ],
   async (req: Request, res: Response) => {
     // await FriendCollection.addFriendByUsername(req.body.username,req.session.userId);
     res.status(201).json({

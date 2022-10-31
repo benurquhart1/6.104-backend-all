@@ -40,11 +40,11 @@ const formsAndHandlers = {
   'edit-freet': editFreet,
   'delete-freet': deleteFreet,
   'follow-user': followUser,
-  'unfollow-user':unfollowUser,
-  'favorite-user': favoriteUser,
-  'unfavorite-user':unfavoriteUser,
-  'friend-user': friendUser,
-  'unfriend-user':unfriendUser,
+  // 'unfollow-user':unfollowUser,
+  // 'favorite-user': favoriteUser,
+  // 'unfavorite-user':unfavoriteUser,
+  // 'friend-user': friendUser,
+  // 'unfriend-user':unfriendUser,
 };
 
 // Attach handlers to forms

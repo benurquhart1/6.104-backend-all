@@ -36,7 +36,7 @@ class FollowCollection {
    */
   static async addFollowById(followingId: Types.ObjectId | string, followerId: Types.ObjectId | string): Promise<void> {
     FollowModel.updateOne({userId:followerId},{$addToSet: {following:followingId}});
-    FollowModel.updateOne({userId:followingId},{$addToSet: {follower:followerId}});
+    FollowModel.updateOne({userId:followingId},{$addToSet: {followers:followerId}});
   }
 
   /**
@@ -47,7 +47,7 @@ class FollowCollection {
    */
   static async deleteFollowById(unfollowingId: Types.ObjectId | string, followerId: Types.ObjectId | string): Promise<void> {
     FollowModel.updateOne({userId:followerId},{$pull: {following:unfollowingId}});
-    FollowModel.updateOne({userId:unfollowingId},{$pull: {follower:followerId}});
+    FollowModel.updateOne({userId:unfollowingId},{$pull: {followers:followerId}});
   }
 
   /**
@@ -59,7 +59,7 @@ class FollowCollection {
   static async addFollowByUsername(followingUsername: string, followerId: Types.ObjectId | string): Promise<void> {
     const followingId = (await UserCollection.findOneByUsername(followingUsername))._id
     FollowModel.updateOne({userId:followerId},{$addToSet: {following:followingId}});
-    FollowModel.updateOne({userId:followingId},{$addToSet: {follower:followerId}});
+    FollowModel.updateOne({userId:followingId},{$addToSet: {followers:followerId}});
   }
 
   /**
@@ -71,7 +71,7 @@ class FollowCollection {
   static async deleteFollowByUsername(unfollowingUsername:string, followerId: Types.ObjectId | string): Promise<void> {
     const unfollowingId = (await UserCollection.findOneByUsername(unfollowingUsername))._id;
     FollowModel.updateOne({userId:followerId},{$pull: {following:unfollowingId}});
-    FollowModel.updateOne({userId:unfollowingId},{$pull: {follower:followerId}});
+    FollowModel.updateOne({userId:unfollowingId},{$pull: {followers:followerId}});
   }
 
   /**

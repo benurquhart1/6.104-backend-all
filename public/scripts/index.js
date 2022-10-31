@@ -45,6 +45,9 @@ const formsAndHandlers = {
   'unfavorite-user':unfavoriteUser,
   'friend-user': friendUser,
   'unfriend-user':unfriendUser,
+  'view-follow-of-user':viewFollowersAndFollowing,
+  'view-favorites-of-user':viewFavoriting,
+  'view-friends-of-user':viewFriendsandFriending
 };
 
 // Attach handlers to forms

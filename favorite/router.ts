@@ -41,16 +41,16 @@ router.get(
  */
 router.post(
   '/',
-  [
-    userValidator.isUserLoggedIn,
-    userValidator.isUsernameExistsBody,
-    favoriteValidator.isNotFavoriting,
-  ],
+  // [
+  //   userValidator.isUserLoggedIn,
+  //   userValidator.isUsernameExistsBody,
+  //   favoriteValidator.isNotFavoriting,
+  // ],
   async (req: Request, res: Response) => {
     await FavoriteCollection.addFavoriteByUsername(req.body.username,req.session.userId);
-    res.status(201).json({
-      message: `you are now favoriting ${req.body.username}`
-    });
+    // res.status(201).json({
+    //   message: `you are now favoriting ${req.body.username}`
+    // });
   }
 );
 

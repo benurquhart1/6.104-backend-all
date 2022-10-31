@@ -80,4 +80,4 @@ router.delete(
   }
 );
 
-export {router as FriendRouter};
+export {router as friendRouter};

@@ -14,7 +14,7 @@ function unfriendUser(fields) {
     .catch(showResponse);
 }
 
-function viewFriendsAndFriending(fields) {
+function viewFriendsandFriending(fields) {
   fetch(`/api/friend?username=${fields.username}`)
     .then(showResponse)
     .catch(showResponse);

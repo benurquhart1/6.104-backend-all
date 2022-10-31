@@ -57,7 +57,7 @@ class FollowCollection {
    * @param {string} followerId - The id of the user that is being followed
    */
   static async addFollowByUsername(followingUsername: string, followerId: Types.ObjectId | string): Promise<void> {
-    const followingId = (await UserCollection.findOneByUserId(followingUsername))._id
+    const followingId = (await UserCollection.findOneByUsername(followingUsername))._id
     FollowModel.updateOne({userId:followerId},{$addToSet: {following:followingId}});
     FollowModel.updateOne({userId:followingId},{$addToSet: {follower:followerId}});
   }
@@ -69,7 +69,7 @@ class FollowCollection {
    * @param {string} followerId - The id of the user that is being followed
    */
   static async deleteFollowByUsername(unfollowingUsername:string, followerId: Types.ObjectId | string): Promise<void> {
-    const unfollowingId = (await UserCollection.findOneByUserId(unfollowingUsername))._id;
+    const unfollowingId = (await UserCollection.findOneByUsername(unfollowingUsername))._id;
     FollowModel.updateOne({userId:followerId},{$pull: {following:unfollowingId}});
     FollowModel.updateOne({userId:unfollowingId},{$pull: {follower:followerId}});
   }
@@ -89,7 +89,7 @@ class FollowCollection {
    * @param {string} username - the username of the one that you are finding the Follow model for
    */
   static async findOneByUsername(username: string): Promise<HydratedDocument<Follow>> {
-    const userId = (await UserCollection.findOneByUserId(username))._id;
+    const userId = (await UserCollection.findOneByUsername(username))._id;
     return FollowModel.findOne({user:userId}).populate('userId').populate('following').populate('follower');
   }
 
@@ -100,7 +100,6 @@ class FollowCollection {
    * @param {string} followerId - The id of the user that is being followed
    */
    static async checkFollowingById(followingId: Types.ObjectId | string, followerId: Types.ObjectId | string): Promise<Boolean> {
-    return false;
     const follow = await this.findOneById(followerId);
     const following = await FollowModel.findOne({user: new Types.ObjectId(followerId), following:followingId}).exec();
     return following !== null;

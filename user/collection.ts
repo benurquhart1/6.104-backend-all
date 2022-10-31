@@ -1,8 +1,8 @@
 import type {HydratedDocument, Types} from 'mongoose';
 import type {User} from './model';
 import UserModel from './model';
-import FollowModel from 'follow/model';
-import FollowCollection from 'follow/collection';
+import FollowModel from '../follow/model';
+import FollowCollection from '../follow/collection';
 
 /**
  * This file contains a class with functionality to interact with users stored

@@ -8,7 +8,7 @@ import type {User} from '../user/model';
  * DO NOT implement operations here ---> use collection file
  */
 
-export enum Sort {date= 0, dateReversed, reacts, views, reactsPerView};
+export enum Sort {date= 0, dateReversed, reacts, views};
 
 // Type definition for feed on the backend
 export type Feed = {

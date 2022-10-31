@@ -47,7 +47,7 @@ router.post(
   //   favoriteValidator.isNotFavoriting,
   // ],
   async (req: Request, res: Response) => {
-    await FavoriteCollection.addFavoriteByUsername(req.body.username,req.session.userId);
+    await FavoriteCollection.addFavoriteByUsername(req.body.username as string,req.session.userId);
     // res.status(201).json({
     //   message: `you are now favoriting ${req.body.username}`
     // });

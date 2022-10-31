@@ -1,4 +1,4 @@
-import type {HydratedDocument, Types} from 'mongoose';
+import {HydratedDocument, Types} from 'mongoose';
 import type {User} from '../user/model';
 import FollowModel, { Follow } from './model';
 import UserModel from '../user/model';
@@ -34,7 +34,7 @@ class FollowCollection {
    * @param {string} followingId - the id of the user that is following the other
    * @param {string} followerId - The id of the user that is being followed
    */
-  static async addFollowById(followingId: Types.ObjectId, followerId: Types.ObjectId): Promise<void> {
+  static async addFollowById(followingId: Types.ObjectId | string, followerId: Types.ObjectId | string): Promise<void> {
     FollowModel.updateOne({userId:followerId},{$addToSet: {following:followingId}});
     FollowModel.updateOne({userId:followingId},{$addToSet: {follower:followerId}});
   }
@@ -45,7 +45,7 @@ class FollowCollection {
    * @param {string} unfollowingId - the id of the user that is unfollowing the other
    * @param {string} followerId - The id of the user that is being followed
    */
-  static async deleteFollowById(unfollowingId: Types.ObjectId, followerId: Types.ObjectId): Promise<void> {
+  static async deleteFollowById(unfollowingId: Types.ObjectId | string, followerId: Types.ObjectId | string): Promise<void> {
     FollowModel.updateOne({userId:followerId},{$pull: {following:unfollowingId}});
     FollowModel.updateOne({userId:unfollowingId},{$pull: {follower:followerId}});
   }
@@ -56,7 +56,7 @@ class FollowCollection {
    * @param {string} followingUsername - the username of the user that is following the other
    * @param {string} followerId - The id of the user that is being followed
    */
-  static async addFollowByUsername(followingUsername: string, followerId: Types.ObjectId): Promise<void> {
+  static async addFollowByUsername(followingUsername: string, followerId: Types.ObjectId | string): Promise<void> {
     const followingId = (await UserCollection.findOneByUserId(followingUsername))._id
     FollowModel.updateOne({userId:followerId},{$addToSet: {following:followingId}});
     FollowModel.updateOne({userId:followingId},{$addToSet: {follower:followerId}});
@@ -68,7 +68,7 @@ class FollowCollection {
    * @param {string} unfollowingUsername - the username of the user that is unnfollowing the other
    * @param {string} followerId - The id of the user that is being followed
    */
-  static async deleteFollowByUsername(unfollowingUsername:string, followerId: Types.ObjectId): Promise<void> {
+  static async deleteFollowByUsername(unfollowingUsername:string, followerId: Types.ObjectId | string): Promise<void> {
     const unfollowingId = (await UserCollection.findOneByUserId(unfollowingUsername))._id;
     FollowModel.updateOne({userId:followerId},{$pull: {following:unfollowingId}});
     FollowModel.updateOne({userId:unfollowingId},{$pull: {follower:followerId}});
@@ -79,7 +79,7 @@ class FollowCollection {
    *
    * @param {string} userId - the id of the user that is following the other
    */
-  static async findOneById(userId: Types.ObjectId): Promise<HydratedDocument<Follow>> {
+  static async findOneById(userId: Types.ObjectId | string): Promise<HydratedDocument<Follow>> {
     return FollowModel.findOne({userId:userId}).populate('userId').populate('following').populate('follower');
   }  
 
@@ -99,9 +99,11 @@ class FollowCollection {
    * @param {string} followingId - the id of the account that is checked if followed
    * @param {string} followerId - The id of the user that is being followed
    */
-   static async checkFollowingById(followingId: Types.ObjectId, followerId: Types.ObjectId): Promise<Boolean> {
+   static async checkFollowingById(followingId: Types.ObjectId | string, followerId: Types.ObjectId | string): Promise<Boolean> {
+    return false;
     const follow = await this.findOneById(followerId);
-    return follow.following.includes(followingId);
+    const following = await FollowModel.findOne({user: new Types.ObjectId(followerId), following:followingId}).exec();
+    return following !== null;
   }  
 
   /**
@@ -110,7 +112,7 @@ class FollowCollection {
    * @param {string} followingUsername - the username of the user that is unnfollowing the other
    * @param {string} followerId - The id of the user that is being followed
    */
-  static async checkFololowingByUsername(followingUsername:string, followerId: Types.ObjectId): Promise<Boolean> {
+  static async checkFololowingByUsername(followingUsername:string, followerId: Types.ObjectId | string): Promise<Boolean> {
     const followingId = (await UserCollection.findOneByUserId(followingUsername))._id;
     return this.checkFollowingById(followingId,followerId);
   }

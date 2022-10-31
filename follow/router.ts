@@ -73,7 +73,7 @@ router.delete(
     followValidator.isFollowing,
   ],
   async (req: Request, res: Response) => {
-    await FollowCollection.deleteFollowByUsername(req.body.username,req.session.userId);
+    await FollowCollection.deleteFollowByUsername(req.params.username,req.session.userId);
     res.status(200).json({
       message: `you are no longer following ${req.params.username}`
     });

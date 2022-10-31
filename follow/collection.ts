@@ -63,6 +63,19 @@ class FollowCollection {
   }
 
   /**
+   * adds a follow
+   *
+   * @param {string} followingUsername - the username of the user that is following the other
+   * @param {string} followerId - The id of the user that is being followed
+   */
+     static async addFollowByUsername2(followingUsername: string, followerId: Types.ObjectId | string): Promise<string> {
+      const followingId = (await UserCollection.findOneByUsername(followingUsername))._id
+      FollowModel.updateOne({userId:followerId},{$addToSet: {following:followingId}});
+      FollowModel.updateOne({userId:followingId},{$addToSet: {followers:followerId}});
+      return "oog";
+    }
+
+  /**
    * deletes a follow 
    *
    * @param {string} unfollowingUsername - the username of the user that is unnfollowing the other

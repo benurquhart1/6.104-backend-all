@@ -47,9 +47,9 @@ router.post(
     followValidator.isNotFollowing,
   ],
   async (req: Request, res: Response) => {
-    await FollowCollection.addFollowByUsername(req.body.username,req.session.userId);
+    const out = await FollowCollection.addFollowByUsername2(req.body.username,req.session.userId);
     res.status(201).json({
-      message: `you are now following ${req.body.username}`
+      message: `you are now following ${req.body.username}, ${out}`
     });
   }
 );

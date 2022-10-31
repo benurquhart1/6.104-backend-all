@@ -22,15 +22,14 @@ const isFollowing = async (req: Request, res: Response, next: NextFunction) => {
  */
 const isNotFollowing = async (req: Request, res: Response, next: NextFunction) => {
   const following = await FollowCollection.checkFololowingByUsername(req.body.username,req.session.userId);
-  return;
-  // if (following) {
-  //   res.status(409).json({
-  //     error: {
-  //       followFound: `You are already following ${req.body.username}`
-  //     }
-  //   });
-  //   return;
-  // }
+  if (following) {
+    res.status(409).json({
+      error: {
+        followFound: `You are already following ${req.body.username}`
+      }
+    });
+    return;
+  }
   next();
 };
 

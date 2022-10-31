@@ -39,7 +39,7 @@ const formsAndHandlers = {
   'create-freet': createFreet,
   'edit-freet': editFreet,
   'delete-freet': deleteFreet,
-  // 'follow-user': followUser,
+  'follow-user': followUser,
   // 'unfollow-user':unfollowUser,
   // 'favorite-user': favoriteUser,
   // 'unfavorite-user':unfavoriteUser,

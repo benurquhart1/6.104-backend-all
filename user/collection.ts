@@ -24,7 +24,6 @@ class UserCollection {
    */
   static async addOne(username: string, password: string, birthday: Date, bio:string=''): Promise<HydratedDocument<User>> {
     const user = new UserModel({username, password, birthday, bio});
-    await FollowCollection.addOne(user._id);
     await user.save(); // Saves user to MongoDB
     return user;
   }

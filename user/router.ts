@@ -4,6 +4,9 @@ import FreetCollection from '../freet/collection';
 import UserCollection from './collection';
 import * as userValidator from '../user/middleware';
 import * as util from './util';
+import FavoriteCollection from '../favorite/collection';
+import FriendCollection from '../friend/collection';
+import FollowCollection from '../follow/collection';
 
 const router = express.Router();
 
@@ -87,7 +90,10 @@ router.post(
     userValidator.isValidPassword
   ],
   async (req: Request, res: Response) => {
-    const user = await UserCollection.addOne(req.body.username, req.body.password, req.body.birthday,req.body.bio);
+    const user = await UserCollection.addOne(req.body.username, req.body.password, req.body.birthday, req.body.bio);
+    await FollowCollection.addOne(user._id);
+    await FriendCollection.addOne(user._id);
+    await FavoriteCollection.addOne(user._id);
     req.session.userId = user._id.toString();
     res.status(201).json({
       message: `Your account was created successfully. You have been logged in as ${user.username}`,

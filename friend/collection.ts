@@ -1,4 +1,4 @@
-import type {HydratedDocument, Types} from 'mongoose';
+import {HydratedDocument, Types} from 'mongoose';
 import type {User} from '../user/model';
 import FriendModel, { Friend } from './model';
 import UserModel from '../user/model';
@@ -19,67 +19,68 @@ class FriendCollection {
    * @param {Types.ObjectId} userId - the id of the user
    * @return {Promise<HydratedDocument<Friend>>} - the Friend object
    */
-  static async addOne(userId: Types.ObjectId): Promise<void> {
+  static async addOne(userId: Types.ObjectId | string): Promise<HydratedDocument<Friend>> {
     const Friend = new FriendModel({
       userId:userId,
       friends:[],
       friendMe:[]
     });
     await Friend.save();
+    return Friend
   }
 
   /**
    * adds a Friend
    *
-   * @param {string} friendId - the id of the user is adding as friend
-   * @param {string} userId - The id of the user that is being added as friend
+   * @param {Types.ObjectId | string} friendId - the id of the user is adding as friend
+   * @param {Types.ObjectId | string} userId - The id of the user that is being added as friend
    */
-  static async addFriendById(friendId: Types.ObjectId, userId: Types.ObjectId): Promise<void> {
-    FriendModel.updateOne({userId:userId},{$addToSet: {firends:friendId}});
-    FriendModel.updateOne({userId:friendId},{$addToSet: {friendMe:userId}});
+  static async addFriendById(friendId: Types.ObjectId, userId: Types.ObjectId | string): Promise<void> {
+    await FriendModel.updateOne({userId:userId},{$addToSet: {friends:friendId}});
+    await FriendModel.updateOne({userId:friendId},{$addToSet: {friendMe:userId}});
   }
 
   /**
    * deletes a Friend
    *
-   * @param {string} friendId - the id of the user is unadded as friend
-   * @param {string} userId - The id of the user that is being unadded as friend
+   * @param {Types.ObjectId | string} friendId - the id of the user is unadded as friend
+   * @param {Types.ObjectId | string} userId - The id of the user that is being unadded as friend
    */
-   static async deleteFriendById(friendId: Types.ObjectId, userId: Types.ObjectId): Promise<void> {
-    FriendModel.updateOne({userId:userId},{$pull: {firends:friendId}});
-    FriendModel.updateOne({userId:friendId},{$pull: {friendMe:userId}});
+   static async deleteFriendById(friendId: Types.ObjectId | string, userId: Types.ObjectId | string): Promise<void> {
+    await FriendModel.updateOne({userId:userId},{$pull: {friends:friendId}});
+    await FriendModel.updateOne({userId:friendId},{$pull: {friendMe:userId}});
   }
 
   /**
    * adds a Friend
    *
    * @param {string} FriendUsername - the username of the user that is Friending the other
-   * @param {string} userId - The id of the user that is being Friended
+   * @param {Types.ObjectId | string} userId - The id of the user that is being Friended
    */
-  static async addFriendByUsername(friendUsername: string, userId: Types.ObjectId): Promise<void> {
+  static async addFriendByUsername(friendUsername: string, userId: Types.ObjectId | string): Promise<void> {
     const friendId = (await UserCollection.findOneByUsername(friendUsername))._id
-    FriendModel.updateOne({userId:userId},{$addToSet: {firends:friendId}});
-    FriendModel.updateOne({userId:friendId},{$addToSet: {friendMe:userId}});
+    await FriendModel.updateOne({userId:userId},{$addToSet: {friends:friendId}});
+    await FriendModel.updateOne({userId:friendId},{$addToSet: {friendMe:userId}});
   }
 
   /**
    * deletes a Friend 
    *
    * @param {string} unFriendingUsername - the username of the user that is unnFriending the other
-   * @param {string} userId - The id of the user that is being Friended
+   * @param {Types.ObjectId | string} userId - The id of the user that is being Friended
    */
-  static async deleteFriendByUsername(unFriendUsername:string, userId: Types.ObjectId): Promise<void> {
+  static async deleteFriendByUsername(unFriendUsername:string, userId: Types.ObjectId | string): Promise<void> {
     const unFriendId = (await UserCollection.findOneByUsername(unFriendUsername))._id;
-    FriendModel.updateOne({userId:userId},{$pull: {firends:unFriendId}});
-    FriendModel.updateOne({userId:unFriendId},{$pull: {friendMe:userId}});
+    await FriendModel.updateOne({userId:userId},{$pull: {friends:unFriendId}});
+    await FriendModel.updateOne({userId:unFriendId},{$pull: {friendMe:userId}});
   }
 
   /**
    * adds one user as a Friender of another
    *
-   * @param {string} userId - the id of the user that is Friending the other
+   * @param {Types.ObjectId | string} userId - the id of the user that is Friending the other
    */
-  static async findOneById(userId: Types.ObjectId): Promise<HydratedDocument<Friend>> {
+  static async findOneById(userId: Types.ObjectId | string): Promise<HydratedDocument<Friend>> {
     return FriendModel.findOne({userId:userId}).populate('userId').populate('friends').populate('friendMe');
   }  
 
@@ -89,53 +90,53 @@ class FriendCollection {
    * @param {string} username - the username of the one that you are finding the Friend model for
    */
   static async findOneByUsername(username: string): Promise<HydratedDocument<Friend>> {
-    const userId = (await UserCollection.findOneByUserId(username))._id;
-    return FriendModel.findOne({user:userId}).populate('userId').populate('friends').populate('freindMe');
+    const userId = (await UserCollection.findOneByUsername(username))._id;
+    return FriendModel.findOne({userId:userId}).populate('userId').populate('friends').populate('friendMe');
   }
 
   /**
    * determine if a user is Friending another user
    *
-   * @param {string} friendId - the id of the account that is checked if Friended
-   * @param {string} userId - The id of the user that is being Friended
+   * @param {Types.ObjectId | string} friendId - the id of the account that is checked if Friended
+   * @param {Types.ObjectId | string} userId - The id of the user that is being Friended
    */
-   static async checkFriendById(friendId: Types.ObjectId, userId: Types.ObjectId): Promise<Boolean> {
-    const Friend = await this.findOneById(userId);
-    return Friend.friends.includes(friendId);
+  static async checkFriendById(friendId: Types.ObjectId | string, userId: Types.ObjectId | string): Promise<Boolean> {
+    const friending = await FriendModel.findOne({userId: new Types.ObjectId(userId), friends:friendId}).exec();
+    return friending !== null;
   }  
 
   /**
-   * determine if there is a friendship pair between users
+   * determine if a user is Friending another user
    *
-   * @param {string} friendId - the id of the account that is checked if Friended
-   * @param {string} userId - The id of the user that is being Friended
+   * @param {Types.ObjectId | string} friendId - the id of the account that is checked if Friended
+   * @param {string} username - The id of the user that is being Friended
    */
-   static async checkFriendshipById(friendId: Types.ObjectId, userId: Types.ObjectId): Promise<Boolean> {
-    const friendFriends = await this.findOneById(userId);
-    const userFriends = await this.findOneById(friendId);
-    return friendFriends.friends.includes(userId) && userFriends.friends.includes(friendId);
-  }  
-
-  /**
-   * deletes a Friend 
-   *
-   * @param {string} friendUsername - the username of the user that is unFriending the other
-   * @param {string} userId - The id of the user that is being Friended
-   */
-  static async checkFololowingByUsername(friendUsername:string, userId: Types.ObjectId): Promise<Boolean> {
-    const friendId = (await UserCollection.findOneByUserId(friendUsername))._id;
+  static async checkFriendByUsername(friendUsername: string, userId: Types.ObjectId | string): Promise<Boolean> {
+    const friendId = (await UserCollection.findOneByUsername(friendUsername))._id;
     return this.checkFriendById(friendId,userId);
-  }
+  }  
+
   /**
    * determine if there is a friendship pair between users
    *
-   * @param {string} friendId - the id of the account that is checked if Friended
-   * @param {string} userId - The id of the user that is being Friended
+   * @param {Types.ObjectId | string} friendId - the id of the account that is checked if Friended
+   * @param {Types.ObjectId | string} userId - The id of the user that is being Friended
    */
-  static async checkFriendshipByUsername(friendUsername: string, userId: Types.ObjectId): Promise<Boolean> {
-    const friendId = (await UserCollection.findOneByUserId(friendUsername))._id;
-    return this.checkFriendshipById(friendId,userId);
+  static async checkFriendshipById(friendId: Types.ObjectId | string, userId: Types.ObjectId | string): Promise<Boolean> {
+    const friending = await FriendModel.findOne({userId: new Types.ObjectId(userId), friends:friendId}).exec();
+    const reverseFriending = await FriendModel.findOne({userId: new Types.ObjectId(friendId), friends:userId}).exec();
+    return friending !== null && reverseFriending !== null;
   }  
+  /**
+   * determine if there is a friendship pair between users
+   *
+   * @param {Types.ObjectId | string} friendId - the id of the account that is checked if Friended
+   * @param {string} username - The id of the user that is being Friended
+   */
+  static async checkFriendshipByUsername(friendUsername: string, userId: Types.ObjectId | string): Promise<Boolean> {
+    const friendId = (await UserCollection.findOneByUsername(friendUsername))._id;
+    return this.checkFriendshipById(friendId,userId);
+  }
 
 }
 

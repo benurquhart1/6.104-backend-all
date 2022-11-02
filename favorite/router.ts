@@ -73,7 +73,7 @@ router.delete(
     favoriteValidator.isFavoriting,
   ],
   async (req: Request, res: Response) => {
-    await FavoriteCollection.deleteFavoriteByUsername(req.body.username,req.session.userId);
+    await FavoriteCollection.deleteFavoriteByUsername(req.params.username,req.session.userId);
     res.status(200).json({
       message: `you are no longer favoriting ${req.params.username}`
     });

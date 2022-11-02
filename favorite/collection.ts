@@ -1,4 +1,4 @@
-import type {HydratedDocument, Types} from 'mongoose';
+import {HydratedDocument, Types} from 'mongoose';
 import type {User} from '../user/model';
 import FavoriteModel, { Favorite } from './model';
 import UserModel from '../user/model';
@@ -33,8 +33,8 @@ class FavoriteCollection {
    * @param {string} favoriteId - the id of the user that is favorites the other
    * @param {string} favoriterId - The id of the user that is being Favoriteed
    */
-  static async addFavoriteById(favoriteId: Types.ObjectId, favoriterId: Types.ObjectId): Promise<void> {
-    FavoriteModel.updateOne({userId:favoriterId},{$addToSet: {favorites:favoriteId}});
+  static async addFavoriteById(favoriteId: Types.ObjectId | string, favoriterId: Types.ObjectId | string): Promise<void> {
+    await FavoriteModel.updateOne({userId:favoriterId},{$addToSet: {favorites:favoriteId}});
   }
 
   /**
@@ -43,8 +43,8 @@ class FavoriteCollection {
    * @param {string} unfavoriteId - the id of the user that is unfavorites the other
    * @param {string} favoriterId - The id of the user that is being Favoriteed
    */
-  static async deleteFavoriteById(unfavoriteId: Types.ObjectId, favoriterId: Types.ObjectId): Promise<void> {
-    FavoriteModel.updateOne({userId:favoriterId},{$pull: {favorites:unfavoriteId}});
+  static async deleteFavoriteById(unfavoriteId: Types.ObjectId | string, favoriterId: Types.ObjectId | string): Promise<void> {
+    await FavoriteModel.updateOne({userId:favoriterId},{$pull: {favorites:unfavoriteId}});
   }
 
   /**
@@ -53,9 +53,9 @@ class FavoriteCollection {
    * @param {string} favoritingUsername - the username of the user that is favorites the other
    * @param {string} favoriterId - The id of the user that is being Favoriteed
    */
-  static async addFavoriteByUsername(favoritingUsername: string, favoriterId: Types.ObjectId): Promise<void> {
-    const favoriteId = (await UserCollection.findOneByUserId(favoritingUsername))._id
-    FavoriteModel.updateOne({userId:favoriterId},{$addToSet: {favorites:favoriteId}});
+  static async addFavoriteByUsername(favoritingUsername: string, favoriterId: Types.ObjectId | string): Promise<void> {
+    const favoriteId = (await UserCollection.findOneByUsername(favoritingUsername))._id
+    await FavoriteModel.updateOne({userId:favoriterId},{$addToSet: {favorites:favoriteId}});
   }
 
   /**
@@ -64,9 +64,9 @@ class FavoriteCollection {
    * @param {string} unfavoritingUsername - the username of the user that is unfavorites the other
    * @param {string} favoriterId - The id of the user that is being favoriteed
    */
-  static async deleteFavoriteByUsername(unfavoritingUsername:string, favoriterId: Types.ObjectId): Promise<void> {
-    const unfavoriteId = (await UserCollection.findOneByUserId(unfavoritingUsername))._id;
-    FavoriteModel.updateOne({userId:favoriterId},{$pull: {favorites:unfavoriteId}});
+  static async deleteFavoriteByUsername(unfavoritingUsername:string, favoriterId: Types.ObjectId | string): Promise<void> {
+    const unfavoriteId = (await UserCollection.findOneByUsername(unfavoritingUsername))._id;
+    await FavoriteModel.updateOne({userId:favoriterId},{$pull: {favorites:unfavoriteId}});
   }
 
   /**
@@ -74,7 +74,7 @@ class FavoriteCollection {
    *
    * @param {string} userId - the id of the user that is favorites the other
    */
-  static async findOneById(userId: Types.ObjectId): Promise<HydratedDocument<Favorite>> {
+  static async findOneById(userId: Types.ObjectId | string): Promise<HydratedDocument<Favorite>> {
     return FavoriteModel.findOne({userId:userId}).populate('userId').populate('favorites');
   }  
 
@@ -84,8 +84,8 @@ class FavoriteCollection {
    * @param {string} username - the username of the one that you are finding the favorite model for
    */
   static async findOneByUsername(username: string): Promise<HydratedDocument<Favorite>> {
-    const userId = (await UserCollection.findOneByUserId(username))._id;
-    return FavoriteModel.findOne({user:userId}).populate('userId').populate('favorites');
+    const userId = (await UserCollection.findOneByUsername(username))._id;
+    return FavoriteModel.findOne({userId:userId}).populate('userId').populate('favorites');
   }
 
   /**
@@ -94,19 +94,18 @@ class FavoriteCollection {
    * @param {string} favoriteId - the id of the account that is checked if favoriteed
    * @param {string} favoriterId - The id of the user that is being favoriteed
    */
-   static async checkFavoritingById(favoriteId: Types.ObjectId, favoriterId: Types.ObjectId): Promise<Boolean> {
-    const Favorite = await this.findOneById(favoriterId);
-    return Favorite.favorites.includes(favoriteId);
+  static async checkFavoritingById(favoriteId: Types.ObjectId | string, favoriterId: Types.ObjectId | string): Promise<Boolean> {
+    const favoriting = await FavoriteModel.findOne({userId: new Types.ObjectId(favoriterId), favorites:favoriteId}).exec();
+    return favoriting !== null;
   }  
-
   /**
    * deletes a Favorite 
    *
    * @param {string} favoritingUsername - the username of the user that is unfavoriting the other
    * @param {string} favoriterId - The id of the user that is being favoriteed
    */
-  static async checkFavoritingByUsername(favoritingUsername:string, favoriterId: Types.ObjectId): Promise<Boolean> {
-    const favoriteId = (await UserCollection.findOneByUserId(favoritingUsername))._id;
+  static async checkFavoritingByUsername(favoritingUsername:string, favoriterId: Types.ObjectId | string): Promise<Boolean> {
+    const favoriteId = (await UserCollection.findOneByUsername(favoritingUsername))._id;
     return this.checkFavoritingById(favoriteId,favoriterId);
   }
 

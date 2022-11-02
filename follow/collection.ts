@@ -81,7 +81,7 @@ class FollowCollection {
    * @param {string} userId - the id of the user that is following the other
    */
   static async findOneById(userId: Types.ObjectId | string): Promise<HydratedDocument<Follow>> {
-    return FollowModel.findOne({userId:userId}).populate('userId').populate('following').populate('follower');
+    return FollowModel.findOne({userId:userId}).populate('userId').populate('following').populate('followers');
   }  
 
   /**
@@ -91,7 +91,7 @@ class FollowCollection {
    */
   static async findOneByUsername(username: string): Promise<HydratedDocument<Follow>> {
     const userId = (await UserCollection.findOneByUsername(username))._id;
-    return FollowModel.findOne({user:userId}).populate('userId').populate('following').populate('follower');
+    return FollowModel.findOne({userId:userId}).populate('userId').populate('following').populate('followers');
   }
 
   /**

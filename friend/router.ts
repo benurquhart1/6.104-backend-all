@@ -44,7 +44,7 @@ router.post(
   [
     userValidator.isUserLoggedIn,
     userValidator.isUsernameExistsBody,
-    // friendValidator.isNotFriending,
+    friendValidator.isNotFriending,
   ],
   async (req: Request, res: Response) => {
     await FriendCollection.addFriendByUsername(req.body.username,req.session.userId);
@@ -73,7 +73,7 @@ router.delete(
     friendValidator.isFriending,
   ],
   async (req: Request, res: Response) => {
-    await FriendCollection.deleteFriendByUsername(req.body.username,req.session.userId);
+    await FriendCollection.deleteFriendByUsername(req.params.username,req.session.userId);
     res.status(200).json({
       message: `you are no longer friending ${req.params.username}`
     });

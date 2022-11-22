@@ -1,6 +1,6 @@
 import type {HydratedDocument, Types} from 'mongoose';
 import type {User} from '../user/model';
-import FeedModel, { Feed, Sort } from './model';
+import FeedModel, { Feed, Sort, PopulatedFeed} from './model';
 import UserModel from '../user/model';
 import UserCollection from '../user/collection';
 
@@ -16,10 +16,11 @@ class FeedCollection {
   /**
    * Set up a feed object for user with s given userId
    *
-   * @param {Types.ObjectId} userId - the id of the user
+   * @param {Types.ObjectId | string} userId - the id of the user
+   * @param {string} name - the name of the feed
    * @return {Promise<HydratedDocument<Feed>} - the feed object
    */
-  static async addOne(userId: Types.ObjectId,name:string): Promise<void> {
+  static async addOne(userId: Types.ObjectId | string, name:string): Promise<HydratedDocument<PopulatedFeed>> {
     const feed = new FeedModel({
       name:name,
       userId:userId,
@@ -32,6 +33,77 @@ class FeedCollection {
     return await feed.populate("userId accounts freets");
   }
 
+  /**
+   * Find a feed object
+   *
+   * @param {Types.ObjectId | string} userId - the id of the user
+   * @param {string} name - the name of the feed
+   * @return {Promise<HydratedDocument<Feed>} - the feed object
+   */
+  static async findOne(userId: Types.ObjectId | string, name:string): Promise<HydratedDocument<PopulatedFeed>> {
+    return await FeedModel.findOne({userId:userId,name:name}).populate("userId accounts freets");
+  }
+
+  /**
+   * deletes a feed object
+   *
+   * @param {Types.ObjectId | string} userId - the id of the user
+   * @param {string} name - the name of the feed
+   */
+  static async deleteOne(userId: Types.ObjectId | string, name:string): Promise<void> {
+    await FeedModel.deleteOne({userId:userId,name:name});
+  }
+
+  /**
+   * Deletes all of a user's feed objects and removes them from the sources for other feeds
+   *
+   * @param {Types.ObjectId | string} userId - the id of the user
+   */
+  static async deleteAllByUser(userId: Types.ObjectId | string): Promise<void> {
+    await FeedModel.deleteMany({userId:userId});
+    await FeedModel.updateMany({userId:userId}, {$pull: {accounts:userId}});
+  }
+
+  /**
+   * adds an account to the feed's accounts
+   *
+   * @param {Types.ObjectId | string} userId - the id of the user
+   * @param {string} name - the name of the feed
+   * @param {string} account - the username of the account who is being added
+   */
+  static async addOneAccount(userId: Types.ObjectId | string, name:string, account:string): Promise<void> {
+    const accountId = (await UserCollection.findOneByUsername(account))._id;
+    await FeedModel.updateOne({userId:userId,name:name}, {$addToSet: {accounts:accountId}});
+  }
+
+  /**
+   * deletes an account to the feed's accounts
+   *
+   * @param {Types.ObjectId | string} userId - the id of the user
+   * @param {string} name - the name of the feed
+   * @param {string} account - the username of the account who is being deleted from accounts
+   */
+  static async deleteOneAccount(userId: Types.ObjectId | string, name:string, account:string): Promise<void> {
+    const accountId = (await UserCollection.findOneByUsername(account))._id;
+    await FeedModel.updateOne({userId:userId,name:name}, {$pull: {accounts:accountId}});
+  }
+
+  /**
+   * checks if an account is in the feed's accounts
+   *
+   * @param {Types.ObjectId | string} userId - the id of the user
+   * @param {string} name - the name of the feed
+   * @param {string} account - the username of the account who is being deleted from accounts
+   * @returns {Boolean} a boolean representing whether or not the account is in the feed
+   */
+  static async checkAccount(userId: Types.ObjectId | string, name:string, account:string): Promise<Boolean> {
+    const accountId = (await UserCollection.findOneByUsername(account))._id;
+    const feed = await FeedModel.findOne({userId:userId, name:name, accounts:accountId});
+    return feed !== null;
+  }
+
 }
+
+
 
 export default FeedCollection;

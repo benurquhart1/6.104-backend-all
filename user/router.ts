@@ -7,6 +7,7 @@ import * as util from './util';
 import FavoriteCollection from '../favorite/collection';
 import FriendCollection from '../friend/collection';
 import FollowCollection from '../follow/collection';
+import FeedCollection from 'feed/collection';
 
 const router = express.Router();
 
@@ -94,6 +95,9 @@ router.post(
     await FollowCollection.addOne(user._id);
     await FriendCollection.addOne(user._id);
     await FavoriteCollection.addOne(user._id);
+    await FeedCollection.addOne(user._id,"following");
+    await FeedCollection.addOne(user._id,"favorites");
+    await FeedCollection.addOne(user._id,"friends");
     req.session.userId = user._id.toString();
     res.status(201).json({
       message: `Your account was created successfully. You have been logged in as ${user.username}`,
@@ -150,6 +154,12 @@ router.delete(
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
     await UserCollection.deleteOne(userId);
     await FreetCollection.deleteMany(userId);
+    await FeedCollection.deleteOne(userId,"following");
+    await FeedCollection.deleteOne(userId,"favorites");
+    await FeedCollection.deleteOne(userId,"friends");
+    await FollowCollection.deleteOne(userId);
+    await FriendCollection.deleteOne(userId);
+    await FavoriteCollection.deleteOne(userId);
     req.session.userId = undefined;
     res.status(200).json({
       message: 'Your account has been deleted successfully.'

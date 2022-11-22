@@ -1,15 +1,15 @@
 import type {Request, Response, NextFunction} from 'express';
-import FollowCollection from '../follow/collection';
+import FeedCollection from '../feed/collection';
 
 /**
- * Checks if a user follows the user with req.params.username
+ * Checks if a user has a feed with a given name
  */
-const isFollowing = async (req: Request, res: Response, next: NextFunction) => {
-  const following = await FollowCollection.checkFololowingByUsername(req.params.username,req.session.userId);
-  if (!following) {
+const isNameExists = async (req: Request, res: Response, next: NextFunction) => {
+  const feed = await FeedCollection.findOne(req.session.userId,req.params.name);
+  if (!feed) {
     res.status(404).json({
       error: {
-        followNotFound: `You do not follow ${req.params.username}`
+        feedNotFound: `the feed with name ${req.params.name} cannot be found`
       }
     });
     return;
@@ -18,15 +18,28 @@ const isFollowing = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 /**
- * Checks if a user is not following the user with req.params.username
+ * Checks if a user does not have a feed with a given name
  */
-const isNotFollowing = async (req: Request, res: Response, next: NextFunction) => {
-  const following = await FollowCollection.checkFololowingByUsername(req.params.username,req.session.userId);
-  if (following) {
+const isNotNameExists = async (req: Request, res: Response, next: NextFunction) => {
+  const feed = await FeedCollection.findOne(req.session.userId,req.params.name);
+  if (feed) {
     res.status(404).json({
       error: {
-        followFound: `You are following ${req.params.username}`
+        feedNotFound: `the feed with name ${req.params.name} cannot be found`
       }
+    });
+    return;
+  }
+  next();
+};
+
+/**
+ * Checks if a name is present in the parameters
+ */
+const isNamePresentBody = async (req: Request, res: Response, next: NextFunction) => {
+  if (req.body.name) {
+    res.status(400).json({
+      error: 'Provided name must be nonempty.'
     });
     return;
   }
@@ -34,6 +47,7 @@ const isNotFollowing = async (req: Request, res: Response, next: NextFunction) =
 };
 
 export {
-  isFollowing,
-  isNotFollowing
+  isNameExists,
+  isNotNameExists,
+  isNamePresentBody,
 };

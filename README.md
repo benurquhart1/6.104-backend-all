@@ -313,3 +313,129 @@ This renders the `index.html` file that will be used to interact with the backen
 **Throws**
 
 - `403` if the user is not logged in
+
+#### `GET /api/follow?username=username` - Get the accounts that a user is following and are following the user
+
+**Returns**
+
+- An array of accounts the user is following
+- An array of accounts that are following the user
+
+**Throws**
+
+- `400` if `username` is not given
+- `404` if `username` is not a recognized username of any user
+
+#### `POST /api/follow` - Follow another user
+
+**Body**
+
+- `username` the username of the account you are following
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `400` If the username is not given
+- `404` If no user has the given username
+- `405` If the account already follows the user
+
+#### `DELETE /api/follow/:username?` - Unfollow another user
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `400` If the username is not given
+- `404` If no user has the given username
+- `405` If the account does not follow the user
+
+
+#### `GET /api/friend?username=username` - Get the accounts that a user is friends with and are friends with the user
+
+**Returns**
+
+- An array of accounts the user has friended
+- An array of accounts that have friended the user
+
+**Throws**
+
+- `400` if `username` is not given
+- `404` if `username` is not a recognized username of any user
+
+#### `POST /api/friend` - Friend another user
+
+**Body**
+
+- `username` the username of the account you are adding as a friend
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `400` If the username is not given
+- `404` If no user has the given username
+- `405` If the account is already friending the user
+
+#### `DELETE /api/friend/:username?` - Unfriend another user
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `400` If the username is not given
+- `404` If no user has the given username
+- `405` If the account does not friend the user
+
+#### `GET /api/favorite?username=username` - Get the accounts that a user favorites
+
+**Returns**
+
+- An array of accounts the user favorites
+
+**Throws**
+
+- `400` if `username` is not given
+- `404` if `username` is not a recognized username of any user
+
+#### `POST /api/avorite` - Favorite another user
+
+**Body**
+
+- `username` the username of the account you are favoriting
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `400` If the username is not given
+- `404` If no user has the given username
+- `405` If the account already favorite the user
+
+#### `DELETE /api/favorite/:username?` - Unfavorite another user
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `400` If the username is not given
+- `404` If no user has the given username
+- `405` If the account does not favorite the user

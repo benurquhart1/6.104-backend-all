@@ -75,5 +75,5 @@ const ContentGroupSchema = new Schema({
   }],
 });
 
-const UserModel = model<User>('User', UserSchema);
-export default UserModel;
+const ContentGroupModel = model<ContentGroup>('ContentGroup', ContentGroupSchema);
+export default ContentGroupModel;

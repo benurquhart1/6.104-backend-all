@@ -1,117 +1,120 @@
 import type {NextFunction, Request, Response} from 'express';
 import express from 'express';
-import FollowCollection from './collection';
+import FeedCollection from './collection';
 import * as userValidator from '../user/middleware';
+import * as feedValidator from '../feed/middleware';
 import * as util from './util';
+import FeedModel from './model';
 
 const router = express.Router();
 
 /**
- * Get all users that the user follows
+ * Get all users that the user feeds
  *
- * @name GET /api/follow?userId=id
- * @return {FollowResponse} - A list of all users that user is following
- * @throws {400} - If userId is not given
- * @throws {404} - If no user has given userId
+ * @name GET /api/feed?name=name
+ * @return {FeedResponse} - A response object for a feed
+ * @throws {403} - If the user is not logged in
+ * @throws {404} - a feed with cannot be found in the users feeds with that name
  */
 
-/**
- * Get a the usernames that a user is following and followed by
- *
- * @name GET /api/follow?username=username
- *
- * @return {FollowResponse} - an object containing the usernames that a user is following and followed by
- * @throws {400} - If username is not given
- * @throws {404} - If no user has given username
- *
- */
 router.get(
   '/',
-  userValidator.isUsernameExistsQuery,
+  [
+    userValidator.isUsernameExistsQuery,
+    feedValidator.isNameExists,
+  ],
   async (req: Request, res: Response) => {
-    const followObject = await FollowCollection.findOneByUsername(req.query.username as string);
-    const response = util.constructFollowResponse(followObject);
+    const feedObject = await FeedCollection.findOne(req.session.userId as string, req.query.name as string);
+    const response = util.constructFeedResponse(feedObject);
     res.status(200).json(response);
   }
 );
 
 /**
- * One user follows another user
+ * create a feed object
  *
- * @name POST /api/freets
+ * @name POST /api/feed
  *
- * @param {string} following - The content of the freet
- * @return {FollowResponse} - The created freet
+ * @param {string} name - The content of the feed
+ * @return {FeedResponse} - The created feed
  * @throws {403} - If the user is not logged in
- * @throws {400} - If username is not given
- * @throws {404} - If no user has given username
+ * @throws {400} - the name for the feed is not given
+ * @throws {404} - The user already has a feed with the given name
  */
 router.post(
   '/',
   [
     userValidator.isUserLoggedIn,
-    userValidator.isUsernameExists,
+    feedValidator.isNamePresentBody,
+    feedValidator.isNotNameExists,
   ],
   async (req: Request, res: Response) => {
-    const followObject = await FollowCollection.addFollowBy
-    const response = util.constructFollowResponse(followObject);
+    const feedObject = await FeedCollection.addOne(req.query.userId as string, req.params.name as string);
+    const response = util.constructFeedResponse(feedObject);
     res.status(200).json(response);
   }
 );
 
 /**
- * Delete a freet
+ * Delete a feed from a user
  *
- * @name DELETE /api/freets/:id
+ * @name DELETE /api/feed/:name
  *
  * @return {string} - A success message
- * @throws {403} - If the user is not logged in or is not the author of
- *                 the freet
- * @throws {404} - If the freetId is not valid
+ * @throws {403} - If the user is not logged in
+ * @throws {400} - the name for the feed is not given
+ * @throws {404} - The user does not have a feed with the given name
  */
 router.delete(
-  '/:freetId?',
+  '/:name?',
   [
     userValidator.isUserLoggedIn,
-    freetValidator.isFreetExists,
-    freetValidator.isValidFreetModifier
+    feedValidator.isNamePresentBody,
+    feedValidator.isNotNameExists,
   ],
   async (req: Request, res: Response) => {
-    await FreetCollection.deleteOne(req.params.freetId);
+    await FeedCollection.deleteOne(req.session.userId as string, req.params.name as string);
     res.status(200).json({
-      message: 'Your freet was deleted successfully.'
+      message: 'Your feed was deleted successfully.'
     });
   }
 );
 
 /**
- * Modify a freet
+ * adds or deletes an account/accounts from a feed object
  *
- * @name PUT /api/freets/:id
+ * @name PUT /api/feed/:name
  *
- * @param {string} content - the new content for the freet
- * @return {FreetResponse} - the updated freet
- * @throws {403} - if the user is not logged in or not the author of
- *                 of the freet
- * @throws {404} - If the freetId is not valid
- * @throws {400} - If the freet content is empty or a stream of empty spaces
- * @throws {413} - If the freet content is more than 140 characters long
+ * @param {Array<string>} addAccounts - the accounts to add to the feed
+ * @param {Array<string>} deleteAccounts - the accounts to delete from the feed
+ * @return {string} - a success message
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - a feed with the given name cannot be found
  */
 router.put(
-  '/:freetId?',
+  '/:name?',
   [
     userValidator.isUserLoggedIn,
-    freetValidator.isFreetExists,
-    freetValidator.isValidFreetModifier,
-    freetValidator.isValidFreetContent
+    feedValidator.isNameExists,
+    feedValidator.isNamePresentBody,
   ],
   async (req: Request, res: Response) => {
-    const freet = await FreetCollection.updateOne(req.params.freetId, req.body.content);
+    const addAccounts = req.body.addAccounts ? JSON.parse(req.body.addAccounts) as Array<string> : [];
+    const deleteAccounts = req.body.deleteAccounts ? JSON.parse(req.body.deleteAccounts) as Array<string> : [];
+    const userId = req.session.userId as string;
+    const name = req.params.name as string;
+    for (const account of addAccounts) {
+      await FeedCollection.addOneAccount(userId, name, account)
+    }
+    for (const account of deleteAccounts) {
+      await FeedCollection.deleteOneAccount(userId, name, account)
+    }
+    const feed = await FeedCollection.findOne(userId,name);
     res.status(200).json({
-      message: 'Your freet was updated successfully.',
-      freet: util.constructFreetResponse(freet)
+      message: 'Your feed has been updated',
+      feed: util.constructFeedResponse(feed)
     });
   }
 );
 
-export {router as freetRouter};
+export {router as feedRouter};

@@ -138,6 +138,24 @@ class FriendCollection {
     return this.checkFriendshipById(friendId,userId);
   }
 
+  /**
+     * delete a friend object for a user with a given id
+     *
+     * @param {Types.ObjectId} userId - the id of the user
+     */
+  static async deleteOne(userId: Types.ObjectId | string): Promise<void> {
+    const friend = await FriendModel.findOne({userId:userId});
+    const friends = friend.friends;
+    const friendMe = friend.friendMe;
+    for (const friend of friendMe) {
+      this.deleteFriendById(friend,userId);
+    }
+    for (const friend of friends) {
+      this.deleteFriendById(userId,friend);
+    }
+    friend.delete()
+  }
+
 }
 
 export default FriendCollection;

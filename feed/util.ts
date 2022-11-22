@@ -1,36 +1,39 @@
 import type {HydratedDocument} from 'mongoose';
-import type {Follow, PopulatedFollow} from '../follow/model';
+import type {Feed, PopulatedFeed} from '../feed/model';
 
 // Update this if you add a property to the Freet type!
-type FollowResponse = {
-  username: string;
-  following: Array<string>;
-  followers: Array<string>;
+type FeedResponse = {
+  name:string;
+  accounts: Array<string>;
+  sort:Number;
+  showViewedFreets:Boolean;
 };
 
 /**
- * Transform a raw Follow object from the database into an object
+ * Transform a raw Feed object from the database into an object
  * with all the information needed by the frontend
  *
- * @param {HydratedDocument<Follow>} follow - A follow object
- * @returns {FollowResponse} - The follow object formatted for the frontend
+ * @param {HydratedDocument<Feed>} feed - A feed object
+ * @returns {FeedResponse} - The feed object formatted for the frontend
  */
-const constructFollowResponse = (follow: HydratedDocument<Follow>): FollowResponse => {
-  const followCopy: PopulatedFollow = {
-    ...follow.toObject({
+const constructFeedResponse = (feed: HydratedDocument<PopulatedFeed>): FeedResponse => {
+  const feedCopy: PopulatedFeed = {
+    ...feed.toObject({
       versionKey: false // Cosmetics; prevents returning of __v property
     })
   };
-  const username:string = followCopy.userId.username;
-  const following:Array<string> = followCopy.following.map(user => user.username);
-  const followers:Array<string> = followCopy.followers.map(user => user.username);
+  const name:string = feedCopy.name;
+  const accounts:Array<string> = feedCopy.accounts.map(user => user.username);
+  const sort = feedCopy.sort;
+  const showViewedFreets = feedCopy.showViewedFreets;
   return {
-    username:username,
-    following:following,
-    followers:followers
+    name:name,
+    accounts: accounts,
+    sort:sort,
+    showViewedFreets:showViewedFreets,
   };
 };
 
 export {
-  constructFollowResponse
+  constructFeedResponse
 };

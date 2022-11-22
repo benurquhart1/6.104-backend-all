@@ -116,6 +116,24 @@ class FollowCollection {
     return this.checkFollowingById(followingId,followerId);
   }
 
+  /**
+     * delete a follow object for a user with a given id
+     *
+     * @param {Types.ObjectId} userId - the id of the user
+     */
+  static async deleteOne(userId: Types.ObjectId | string): Promise<void> {
+    const follow = await FollowModel.findOne({userId:userId});
+    const followers = follow.followers;
+    const following = follow.following;
+    for (const follower of followers) {
+      this.deleteFollowById(follower,userId);
+    }
+    for (const follow of following) {
+      this.deleteFollowById(userId,follow);
+    }
+    follow.delete()
+  }
+
 }
 
 export default FollowCollection;

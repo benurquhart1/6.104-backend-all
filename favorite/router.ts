@@ -4,6 +4,7 @@ import FavoriteCollection from './collection';
 import * as userValidator from '../user/middleware';
 import * as favoriteValidator from './middleware';
 import * as util from './util';
+import FeedCollection from 'feed/collection';
 
 const router = express.Router();
 
@@ -48,6 +49,7 @@ router.post(
   ],
   async (req: Request, res: Response) => {
     await FavoriteCollection.addFavoriteByUsername(req.body.username,req.session.userId);
+    await FeedCollection.addOneAccount(req.session.userId,"favorites",req.body.username as string);
     res.status(201).json({
       message: `you are now favoriting ${req.body.username}`
     });
@@ -74,6 +76,7 @@ router.delete(
   ],
   async (req: Request, res: Response) => {
     await FavoriteCollection.deleteFavoriteByUsername(req.params.username,req.session.userId);
+    await FeedCollection.deleteOneAccount(req.session.userId,"favorites",req.body.username as string);
     res.status(200).json({
       message: `you are no longer favoriting ${req.params.username}`
     });

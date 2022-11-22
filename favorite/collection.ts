@@ -14,7 +14,7 @@ import UserCollection from '../user/collection';
  */
 class FavoriteCollection {
   /**
-   * Set up a favorite object for user with s given userId
+   * Set up a favorite object for user with a given userId
    *
    * @param {Types.ObjectId} userId - the id of the user
    * @return {Promise<HydratedDocument<Favorite>>} - the favorite object
@@ -98,6 +98,7 @@ class FavoriteCollection {
     const favoriting = await FavoriteModel.findOne({userId: new Types.ObjectId(favoriterId), favorites:favoriteId}).exec();
     return favoriting !== null;
   }  
+
   /**
    * deletes a Favorite 
    *
@@ -107,6 +108,20 @@ class FavoriteCollection {
   static async checkFavoritingByUsername(favoritingUsername:string, favoriterId: Types.ObjectId | string): Promise<Boolean> {
     const favoriteId = (await UserCollection.findOneByUsername(favoritingUsername))._id;
     return this.checkFavoritingById(favoriteId,favoriterId);
+  }
+
+  /**
+     * delete a favorite object for a user with a given id
+     *
+     * @param {Types.ObjectId} userId - the id of the user
+     */
+  static async deleteOne(userId: Types.ObjectId | string): Promise<void> {
+    const favorite = await FavoriteModel.findOne({userId:userId});
+    const favorites = favorite.favorites;
+    for (const favorite of favorites) {
+      this.deleteFavoriteById(userId,favorite);
+    }
+    favorite.delete()
   }
 
 }

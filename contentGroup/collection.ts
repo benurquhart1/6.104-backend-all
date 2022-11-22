@@ -1,99 +1,59 @@
 import type {HydratedDocument, Types} from 'mongoose';
-import type {User} from './model';
-import UserModel from './model';
+import type {ContentGroup, PopulatedContentGroup} from './model';
+import ContentGroupModel from './model';
 
 /**
- * This file contains a class with functionality to interact with users stored
+ * This file contains a class with functionality to interact with ContentGroups stored
  * in MongoDB, including adding, finding, updating, and deleting. Feel free to add
  * additional operations in this file.
  *
- * Note: HydratedDocument<User> is the output of the UserModel() constructor,
- * and contains all the information in User. https://mongoosejs.com/docs/typescript.html
+ * Note: HydratedDocument<ContentGroup> is the output of the ContentGroupModel() constructor,
+ * and contains all the information in ContentGroup. https://mongoosejs.com/docs/typescript.html
  */
-class UserCollection {
+class ContentGroupCollection {
   /**
-   * Add a new user
+   * Add a new ContentGroup object
    *
-   * @param {string} username - The username of the user
-   * @param {string} password - The password of the user
-   * @param {Date} birthday - The bir   m thday of the user
+   * @param {string} name - The name of the content group
+   * @param {Types.ObjectId} userId - the id of the user creating the content group
    * @param {Boolean} isPublic - A boolen representing whether or not the profile is public
-   * @param {string} bio - The user's bio
-   * @return {Promise<HydratedDocument<User>>} - The newly created user
+   * @param {string} description - The ContentGroup's description
+   * @return {Promise<HydratedDocument<ContentGroup>>} - The newly created ContentGroup
    */
-  static async addOne(username: string, password: string, birthday: Date, isPublic:Boolean, bio:string=''): Promise<HydratedDocument<User>> {
-    const dateJoined = new Date();
-
-    const user = new UserModel({username, password, birthday, isPublic, bio});
-    await user.save(); // Saves user to MongoDB
-    return user;
-  }
-
-  /**
-   * Find a user by userId.
-   *
-   * @param {string} userId - The userId of the user to find
-   * @return {Promise<HydratedDocument<User>> | Promise<null>} - The user with the given username, if any
-   */
-  static async findOneByUserId(userId: Types.ObjectId | string): Promise<HydratedDocument<User>> {
-    return UserModel.findOne({_id: userId});
-  }
-
-  /**
-   * Find a user by username (case insensitive).
-   *
-   * @param {string} username - The username of the user to find
-   * @return {Promise<HydratedDocument<User>> | Promise<null>} - The user with the given username, if any
-   */
-  static async findOneByUsername(username: string): Promise<HydratedDocument<User>> {
-    return UserModel.findOne({username: new RegExp(`^${username.trim()}$`, 'i')});
-  }
-
-  /**
-   * Find a user by username (case insensitive).
-   *
-   * @param {string} username - The username of the user to find
-   * @param {string} password - The password of the user to find
-   * @return {Promise<HydratedDocument<User>> | Promise<null>} - The user with the given username, if any
-   */
-  static async findOneByUsernameAndPassword(username: string, password: string): Promise<HydratedDocument<User>> {
-    return UserModel.findOne({
-      username: new RegExp(`^${username.trim()}$`, 'i'),
-      password
+  static async addOne(name: string, userId: Types.ObjectId, isPublic:Boolean, description:string=''): Promise<HydratedDocument<ContentGroup>> {
+    const contentGroup = new ContentGroupModel({
+      name:name,
+      isPublic:false,
+      description:description,
+      owner:userId,
+      moderators:[userId],
+      followers:[userId],
+      accounts:[],
     });
+    await contentGroup.save(); // Saves ContentGroup to MongoDB
+    return contentGroup;
+  }
+  
+  /**
+   * finds a content group with a given name
+   *
+   * @param {string} name - The name of the content group
+   * @return {Promise<HydratedDocument<PopulatedContentGroup>> | Promise<null>} - The ContentGroup with the given ContentGroupname, if any
+   */
+  static async findOne(name:string): Promise<HydratedDocument<PopulatedContentGroup>> {
+    return await ContentGroupModel.findOne({name:name}).populate("owner moderators followers accounts");
   }
 
   /**
-   * Update user's information
+   * deletes a content group with a given name
    *
-   * @param {string} userId - The userId of the user to update
-   * @param {Object} userDetails - An object with the user's updated credentials
-   * @return {Promise<HydratedDocument<User>>} - The updated user
+   * @param {string} name - The name of the content group
+   * @return {Promise<HydratedDocument<PopulatedContentGroup>> | Promise<null>} - The ContentGroup with the given ContentGroupname, if any
    */
-  static async updateOne(userId: Types.ObjectId | string, userDetails: any): Promise<HydratedDocument<User>> {
-    const user = await UserModel.findOne({_id: userId});
-    if (userDetails.password) {
-      user.password = userDetails.password as string;
-    }
-
-    if (userDetails.username) {
-      user.username = userDetails.username as string;
-    }
-
-    await user.save();
-    return user;
+  static async deleteOne(name:string): Promise<void> {
+    await ContentGroupModel.deleteOne({name:name});
   }
 
-  /**
-   * Delete a user from the collection.
-   *
-   * @param {string} userId - The userId of user to delete
-   * @return {Promise<Boolean>} - true if the user has been deleted, false otherwise
-   */
-  static async deleteOne(userId: Types.ObjectId | string): Promise<boolean> {
-    const user = await UserModel.deleteOne({_id: userId});
-    return user !== null;
-  }
 }
 
-export default UserCollection;
+export default ContentGroupCollection;

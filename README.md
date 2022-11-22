@@ -410,7 +410,7 @@ This renders the `index.html` file that will be used to interact with the backen
 - `400` if `username` is not given
 - `404` if `username` is not a recognized username of any user
 
-#### `POST /api/avorite` - Favorite another user
+#### `POST /api/favorite` - Favorite another user
 
 **Body**
 
@@ -439,3 +439,61 @@ This renders the `index.html` file that will be used to interact with the backen
 - `400` If the username is not given
 - `404` If no user has the given username
 - `405` If the account does not favorite the user
+
+#### `GET /api/feed?name=name` - Get a feed object with name = name for the user
+
+**Returns**
+
+- A feed response to be used in the frontend
+
+**Throws**
+
+- `403` the user is not logged in
+- `404` a feed with cannot be found in the users feeds with that name
+
+#### `POST /api/feed` - Create a feed with a given name
+
+**Body**
+
+- `name` the name of the feed the user is creating
+
+**Returns**
+
+- a feed response for the created feed
+
+**Throws**
+
+- `403` the user is not logged in
+- `400` the name is not given
+- `404` The user already has a feed with the given name
+
+#### `DELETE /api/favorite/:name` - Delete a feed with a given name
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` the user is not logged in
+- `400` the name is not given
+- `404` The user does not have a feed with the given name
+
+#### `PUT /api/favorite/` - updates the feed with name = name for a user
+
+**Body**
+
+- `name` the name of the feed the user is updating
+- `addAccounts` a list of the accounts to add to the feed
+- `removeAccounts` a list of the accounts to remove from the feed
+
+
+**Returns**
+
+- the updated feed
+
+**Throws**
+
+- `403` the user is not logged in
+- `400` the name is not given
+- `404` The user does not have a feed with the given name

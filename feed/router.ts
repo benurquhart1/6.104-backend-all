@@ -9,7 +9,7 @@ import FeedModel from './model';
 const router = express.Router();
 
 /**
- * Get all users that the user feeds
+ * Get a user's feed object for a feed with name = name
  *
  * @name GET /api/feed?name=name
  * @return {FeedResponse} - A response object for a feed
@@ -81,18 +81,20 @@ router.delete(
 );
 
 /**
- * adds or deletes an account/accounts from a feed object
+ * adds or removes an account/accounts from a feed object
  *
- * @name PUT /api/feed/:name
- *
+ * @name PUT /api/feed/
+ * 
+ * @param {string} name - The content of the feed
  * @param {Array<string>} addAccounts - the accounts to add to the feed
- * @param {Array<string>} deleteAccounts - the accounts to delete from the feed
+ * @param {Array<string>} removeAccounts - the accounts to delete from the feed
  * @return {string} - a success message
  * @throws {403} - if the user is not logged in
+ * @throws {400} - the name for the feed is not given
  * @throws {404} - a feed with the given name cannot be found
  */
 router.put(
-  '/:name?',
+  '/',
   [
     userValidator.isUserLoggedIn,
     feedValidator.isNameExists,
@@ -100,13 +102,13 @@ router.put(
   ],
   async (req: Request, res: Response) => {
     const addAccounts = req.body.addAccounts ? JSON.parse(req.body.addAccounts) as Array<string> : [];
-    const deleteAccounts = req.body.deleteAccounts ? JSON.parse(req.body.deleteAccounts) as Array<string> : [];
+    const removeAccounts = req.body.removeAccounts ? JSON.parse(req.body.removeAccounts) as Array<string> : [];
     const userId = req.session.userId as string;
-    const name = req.params.name as string;
+    const name = req.body.name as string;
     for (const account of addAccounts) {
       await FeedCollection.addOneAccount(userId, name, account)
     }
-    for (const account of deleteAccounts) {
+    for (const account of removeAccounts) {
       await FeedCollection.deleteOneAccount(userId, name, account)
     }
     const feed = await FeedCollection.findOne(userId,name);

@@ -20,17 +20,16 @@ class FeedCollection {
    * @param {string} name - the name of the feed
    * @return {Promise<HydratedDocument<Feed>} - the feed object
    */
-  static async addOne(userId: Types.ObjectId | string, name:string): Promise<HydratedDocument<PopulatedFeed>> {
+  static async addOne(userId: Types.ObjectId | string, name:string): Promise<HydratedDocument<Feed>> {
     const feed = new FeedModel({
       name:name,
       userId:userId,
       accounts:[],
-      freets:[],
       sort:Sort.date,
       showViewedFreets: false,
     });
     await feed.save();
-    return await feed.populate("userId accounts freets");
+    return FeedModel.findOne({userId:userId,name:name}).populate("userId").populate('accounts');
   }
 
   /**
@@ -40,8 +39,19 @@ class FeedCollection {
    * @param {string} name - the name of the feed
    * @return {Promise<HydratedDocument<Feed>} - the feed object
    */
-  static async findOne(userId: Types.ObjectId | string, name:string): Promise<HydratedDocument<PopulatedFeed>> {
-    return await FeedModel.findOne({userId:userId,name:name}).populate("userId accounts freets");
+  static async findOne(userId: Types.ObjectId | string, name:string): Promise<HydratedDocument<Feed>> {
+    return FeedModel.findOne({userId:userId,name:name}).populate("userId").populate('accounts');
+  }
+
+  /**
+   * Find a feed object unpopulated
+   *
+   * @param {Types.ObjectId | string} userId - the id of the user
+   * @param {string} name - the name of the feed
+   * @return {Promise<HydratedDocument<Feed>} - the feed object
+   */
+   static async findOneUnpopulated(userId: Types.ObjectId | string, name:string): Promise<HydratedDocument<Feed>> {
+    return FeedModel.findOne({userId:userId,name:name})
   }
 
   /**
@@ -77,6 +87,17 @@ class FeedCollection {
   }
 
   /**
+   * adds an account to the feed's accounts
+   *
+   * @param {Types.ObjectId | string} userId - the id of the user
+   * @param {string} name - the name of the feed
+   * @param {Sort} sort - the new sort of the feed
+   */
+   static async setSort(userId: Types.ObjectId | string, name:string, sort:Sort): Promise<void> {
+    await FeedModel.updateOne({userId:userId,name:name}, {$set: {sort:sort}});
+  }
+
+  /**
    * deletes an account to the feed's accounts
    *
    * @param {Types.ObjectId | string} userId - the id of the user
@@ -101,6 +122,18 @@ class FeedCollection {
     const feed = await FeedModel.findOne({userId:userId, name:name, accounts:accountId});
     return feed !== null;
   }
+
+  // /**
+  //  * Set up a feed object for user with s given userId
+  //  *
+  //  * @param {Types.ObjectId | string} userId - the id of the user
+  //  * @param {string} name - the name of the feed
+  //  * @return {Promise<HydratedDocument<Feed>} - the feed object
+  //  */
+  // static async getFreets(userId: Types.ObjectId | string, name:string): Promise<Array<PopulatedFreet>> {
+  //   const feed = await FeedModel.findOne({userId:userId,name:name});
+  //   const freets = FreetCollection.
+  // }
 
 }
 

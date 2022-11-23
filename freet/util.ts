@@ -1,9 +1,10 @@
 import type {HydratedDocument} from 'mongoose';
 import moment from 'moment';
 import type {Freet, PopulatedFreet} from '../freet/model';
+import { Sort } from 'feed/model';
 
 // Update this if you add a property to the Freet type!
-type FreetResponse = {
+export type FreetResponse = {
   _id: string;
   author: string;
   dateCreated: string;
@@ -44,5 +45,5 @@ const constructFreetResponse = (freet: HydratedDocument<Freet>): FreetResponse =
 };
 
 export {
-  constructFreetResponse
+  constructFreetResponse,
 };

@@ -20,12 +20,11 @@ const router = express.Router();
 router.get(
   '/',
   [
-    userValidator.isUsernameExistsQuery,
-    feedValidator.isNameExists,
+    feedValidator.isNameExistsQuery,
   ],
   async (req: Request, res: Response) => {
     const feedObject = await FeedCollection.findOne(req.session.userId as string, req.query.name as string);
-    const response = util.constructFeedResponse(feedObject);
+    const response = await util.constructFeedResponse(feedObject);
     res.status(200).json(response);
   }
 );
@@ -50,7 +49,7 @@ router.post(
   ],
   async (req: Request, res: Response) => {
     const feedObject = await FeedCollection.addOne(req.query.userId as string, req.params.name as string);
-    const response = util.constructFeedResponse(feedObject);
+    const response = await util.constructFeedResponse(feedObject);
     res.status(200).json(response);
   }
 );
@@ -88,6 +87,7 @@ router.delete(
  * @param {string} name - The content of the feed
  * @param {Array<string>} addAccounts - the accounts to add to the feed
  * @param {Array<string>} removeAccounts - the accounts to delete from the feed
+ * @param {number} sort - the sort of the account
  * @return {string} - a success message
  * @throws {403} - if the user is not logged in
  * @throws {400} - the name for the feed is not given
@@ -111,10 +111,13 @@ router.put(
     for (const account of removeAccounts) {
       await FeedCollection.deleteOneAccount(userId, name, account)
     }
+    if (req.body.sort) {
+      await FeedCollection.setSort(userId,name, req.body.sort);
+    }
     const feed = await FeedCollection.findOne(userId,name);
     res.status(200).json({
       message: 'Your feed has been updated',
-      feed: util.constructFeedResponse(feed)
+      feed: feed
     });
   }
 );

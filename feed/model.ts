@@ -16,7 +16,6 @@ export type Feed = {
   name:string;
   userId:Types.ObjectId;
   accounts: Array<Types.ObjectId>;
-  freets: Array<Types.ObjectId>;
   sort:Sort;
   showViewedFreets:Boolean;
 };
@@ -26,7 +25,6 @@ export type PopulatedFeed = {
   name:string;
   userId:User;
   accounts: Array<User>;
-  freets: Array<PopulatedFreet>;
   sort:Sort;
   showViewedFreets:Boolean;
 }
@@ -43,21 +41,15 @@ const FeedSchema = new Schema<Feed>({
     ref: 'User'
   },
   // the name of the feed/content group
-  name: [{
+  name: {
     type: Schema.Types.String,
     required: true,
-  }],
+  },  
   // A list of accounts whose posts are in the feed
   accounts: [{
     type: Schema.Types.ObjectId,
     required: true,
     ref: 'User'
-  }],
-  // A list of freets in the feed
-  freets: [{
-    type: Schema.Types.ObjectId,
-    required: true,
-    ref: 'Freet'
   }],
   // the current sorting method for the feed
   sort: {

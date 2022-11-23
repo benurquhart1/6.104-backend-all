@@ -19,3 +19,9 @@ function viewFollowersAndFollowing(fields) {
     .then(showResponse)
     .catch(showResponse);
 }
+
+// export {
+//   viewFollowersAndFollowing,
+//   followUser,
+//   unfollowUser
+// }

@@ -7,7 +7,7 @@ import * as util from './util';
 import FavoriteCollection from '../favorite/collection';
 import FriendCollection from '../friend/collection';
 import FollowCollection from '../follow/collection';
-import FeedCollection from 'feed/collection';
+import FeedCollection from '../feed/collection';
 
 const router = express.Router();
 

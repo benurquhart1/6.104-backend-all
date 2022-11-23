@@ -4,7 +4,7 @@ import FriendCollection from './collection';
 import * as userValidator from '../user/middleware';
 import * as friendValidator from './middleware';
 import * as util from './util';
-import FeedCollection from 'feed/collection';
+import FeedCollection from '../feed/collection';
 
 const router = express.Router();
 
@@ -76,7 +76,7 @@ router.delete(
   ],
   async (req: Request, res: Response) => {
     await FriendCollection.deleteFriendByUsername(req.params.username,req.session.userId);
-    await FeedCollection.deleteOneAccount(req.session.userId,"friends",req.body.username as string);
+    await FeedCollection.deleteOneAccount(req.session.userId,"friends",req.params.username as string);
     res.status(200).json({
       message: `you are no longer friending ${req.params.username}`
     });

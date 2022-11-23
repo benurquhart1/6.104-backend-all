@@ -52,12 +52,6 @@ function followUser(fields) {
     .catch(showResponse);
 }
 
-// function followUser() {
-//   fetch('/api/freets')
-//     .then(showResponse)
-//     .catch(showResponse);
-// }
-
 function unfollowUser(fields) {
   fetch(`/api/follow/${fields.username}`, {method: 'DELETE'})
     .then(showResponse)
@@ -106,6 +100,12 @@ function unfriendUser(fields) {
 
 function viewFriendsandFriending(fields) {
   fetch(`/api/friend?username=${fields.username}`)
+    .then(showResponse)
+    .catch(showResponse);
+}
+
+function viewFeedFreetsSorted(fields) {
+  fetch(`/api/feed?name=${fields.name}`)
     .then(showResponse)
     .catch(showResponse);
 }

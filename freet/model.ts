@@ -17,6 +17,7 @@ export type Freet = {
   content: string;
   dateModified: Date;
   views:Array<Types.ObjectId>;
+  numViews:Number
   reacts:Array<Array<Types.ObjectId>>
 };
 
@@ -26,7 +27,11 @@ export type PopulatedFreet = {
   dateCreated: Date;
   content: string;
   dateModified: Date;
+  numViews:Number
   views:Array<User>;
+  reacts:Array<Array<Number>>
+  numReacts:Number
+
 };
 
 // Mongoose schema definition for interfacing with a MongoDB table

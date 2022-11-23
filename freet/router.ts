@@ -109,7 +109,8 @@ router.delete(
  *
  * @name PUT /api/freets/:id
  *
- * @param {string} content - the new content for the freet
+ * @param {string} reaction - the new content for the freet
+ * @param {string} view - whether or not a user is being added as a viewer
  * @return {FreetResponse} - the updated freet
  * @throws {403} - if the user is not logged in or not the author of
  *                 of the freet
@@ -122,8 +123,6 @@ router.put(
   [
     userValidator.isUserLoggedIn,
     freetValidator.isFreetExists,
-    freetValidator.isValidFreetModifier,
-    freetValidator.isValidFreetContent
   ],
   async (req: Request, res: Response) => {
     const freet = await FreetCollection.updateOne(req.params.freetId, req.body.content);

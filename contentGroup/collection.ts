@@ -1,4 +1,6 @@
 import type {HydratedDocument, Types} from 'mongoose';
+import UserCollection from 'user/collection';
+import UserModel from 'user/model';
 import type {ContentGroup, PopulatedContentGroup} from './model';
 import ContentGroupModel from './model';
 
@@ -53,6 +55,35 @@ class ContentGroupCollection {
   static async deleteOne(name:string): Promise<void> {
     await ContentGroupModel.deleteOne({name:name});
   }
+
+  /**
+   * add a moderator to a content group
+   * 
+   * @param {string} owner - the owner of the content group
+   * @param {string} name - The name of the content group
+   * @param {string} moderator - the username of the moderator being added to the account
+   */
+  static async addModerator(owner:string, name:string, moderator: string): Promise<void> {
+    const ownerId = (await UserCollection.findOneByUsername(owner))._id;
+    const moderatorId = (await UserCollection.findOneByUsername(moderator))._id;
+    await ContentGroupModel.updateOne({owner:ownerId,name:name},{$addToSet: {moderator:moderatorId}});
+  }
+
+  /**
+   * remove a moderator from a content group
+   * 
+   * @param {string} owner - the owner of the content group
+   * @param {string} name - The name of the content group
+   * @param {string} moderator - the username of the moderator being added to the account
+   */
+   static async removeModerator(owner:string, name:string, moderator: string): Promise<void> {
+    const ownerId = (await UserCollection.findOneByUsername(owner))._id;
+    const moderatorId = (await UserCollection.findOneByUsername(moderator))._id;
+    await ContentGroupModel.updateOne({owner:ownerId,name:name},{$pull: {moderator:moderatorId}});
+  }
+
+
+
 
 }
 

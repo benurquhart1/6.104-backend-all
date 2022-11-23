@@ -18,6 +18,22 @@ const isNameExists = async (req: Request, res: Response, next: NextFunction) => 
 };
 
 /**
+ * Checks if a user has a feed with a given name
+ */
+const isNameExistsQuery = async (req: Request, res: Response, next: NextFunction) => {
+  const feed = await FeedCollection.findOne(req.session.userId,req.query.name as string);
+  if (!feed) {
+    res.status(404).json({
+      error: {
+        feedNotFound: `the feed with name ${req.query.name as string} cannot be found`
+      }
+    });
+    return;
+  }
+  next();
+};
+
+/**
  * Checks if a user does not have a feed with a given name
  */
 const isNotNameExists = async (req: Request, res: Response, next: NextFunction) => {
@@ -48,6 +64,7 @@ const isNamePresentBody = async (req: Request, res: Response, next: NextFunction
 
 export {
   isNameExists,
+  isNameExistsQuery,
   isNotNameExists,
   isNamePresentBody,
 };

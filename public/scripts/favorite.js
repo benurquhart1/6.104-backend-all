@@ -19,3 +19,7 @@ function viewFavoriting(fields) {
     .then(showResponse)
     .catch(showResponse);
 }
+
+// export {
+
+// }

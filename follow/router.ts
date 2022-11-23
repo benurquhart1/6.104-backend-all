@@ -4,7 +4,7 @@ import FollowCollection from './collection';
 import * as userValidator from '../user/middleware';
 import * as followValidator from './middleware';
 import * as util from './util';
-import FeedCollection from 'feed/collection';
+import FeedCollection from '../feed/collection';
 
 const router = express.Router();
 
@@ -76,7 +76,7 @@ router.delete(
   ],
   async (req: Request, res: Response) => {
     await FollowCollection.deleteFollowByUsername(req.params.username,req.session.userId);
-    await FeedCollection.deleteOneAccount(req.session.userId,"following",req.body.username as string);
+    await FeedCollection.deleteOneAccount(req.session.userId,"following",req.params.username as string);
     res.status(200).json({
       message: `you are no longer following ${req.params.username}`
     });

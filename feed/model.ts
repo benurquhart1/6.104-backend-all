@@ -8,7 +8,7 @@ import type {User} from '../user/model';
  * DO NOT implement operations here ---> use collection file
  */
 
-export enum Sort {date= 0, dateReversed, reacts, views};
+export enum Sort {date= 0, dateReversed, likes};
 
 // Type definition for feed on the backend
 export type Feed = {
@@ -17,7 +17,6 @@ export type Feed = {
   userId:Types.ObjectId;
   accounts: Array<Types.ObjectId>;
   sort:Sort;
-  showViewedFreets:Boolean;
 };
 
 export type PopulatedFeed = {
@@ -26,7 +25,6 @@ export type PopulatedFeed = {
   userId:User;
   accounts: Array<User>;
   sort:Sort;
-  showViewedFreets:Boolean;
 }
 
 
@@ -56,11 +54,6 @@ const FeedSchema = new Schema<Feed>({
     type: Number,
     required: true
   },
-  // Whether or not the feed will show freets which the user has viewed
-  showViewedFreets: {
-    type: Boolean,
-    required: true
-  }
 });
 
 const FeedModel = model<Feed>('Feed', FeedSchema);

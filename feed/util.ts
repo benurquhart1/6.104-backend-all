@@ -11,7 +11,6 @@ type FeedResponse = {
   name:string;
   accounts: Array<string>;
   sort:Number;
-  showViewedFreets:Boolean;
   freets:Array<FreetResponse>
 };
 
@@ -30,16 +29,15 @@ const constructFeedResponse = async(feed: HydratedDocument<Feed>): Promise<FeedR
   };
   const accountIds = feedCopy.accounts.map(user => user._id);
   const accounts:Array<string> = feedCopy.accounts.map(user => user.username);
-  const freets = (await FreetCollection.findAllByIdAndSort(accountIds,feed.sort)).map(freetUtil.constructFreetResponse)
+  const freets = await FreetCollection.findAllByIdAndSort(accountIds,feed.sort)
+  const freetResponse = await Promise.all(freets.map(async(freet) => await freetUtil.constructFreetResponse(freet)))
   const name:string = feedCopy.name;
   const sort = feedCopy.sort;
-  const showViewedFreets = feedCopy.showViewedFreets;
   return {
     name:name,
     accounts: accounts,
-    sort:1,
-    showViewedFreets:false,
-    freets:freets
+    sort:sort,
+    freets:freetResponse
   };
 };
 

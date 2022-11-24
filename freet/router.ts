@@ -36,7 +36,7 @@ router.get(
     }
 
     const allFreets = await FreetCollection.findAll();
-    const response = allFreets.map(util.constructFreetResponse);
+    const response = await Promise.all(allFreets.map(util.constructFreetResponse));
     res.status(200).json(response);
   },
   [
@@ -44,7 +44,7 @@ router.get(
   ],
   async (req: Request, res: Response) => {
     const authorFreets = await FreetCollection.findAllByUsername(req.query.author as string);
-    const response = authorFreets.map(util.constructFreetResponse);
+    const response = await Promise.all(authorFreets.map(util.constructFreetResponse));
     res.status(200).json(response);
   }
 );
@@ -71,10 +71,10 @@ router.post(
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
     const freet = await FreetCollection.addOne(userId, req.body.content);
-
+    const freetResponse = await util.constructFreetResponse(freet);
     res.status(201).json({
       message: 'Your freet was created successfully.',
-      freet: util.constructFreetResponse(freet)
+      freet: freetResponse
     });
   }
 );
@@ -104,33 +104,32 @@ router.delete(
   }
 );
 
-/**
- * Modify a freet
- *
- * @name PUT /api/freets/:id
- *
- * @param {string} reaction - the new content for the freet
- * @param {string} view - whether or not a user is being added as a viewer
- * @return {FreetResponse} - the updated freet
- * @throws {403} - if the user is not logged in or not the author of
- *                 of the freet
- * @throws {404} - If the freetId is not valid
- * @throws {400} - If the freet content is empty or a stream of empty spaces
- * @throws {413} - If the freet content is more than 140 characters long
- */
-router.put(
-  '/:freetId?',
-  [
-    userValidator.isUserLoggedIn,
-    freetValidator.isFreetExists,
-  ],
-  async (req: Request, res: Response) => {
-    const freet = await FreetCollection.updateOne(req.params.freetId, req.body.content);
-    res.status(200).json({
-      message: 'Your freet was updated successfully.',
-      freet: util.constructFreetResponse(freet)
-    });
-  }
-);
+// /**
+//  * Modify a freet
+//  *
+//  * @name PUT /api/freets/:id
+//  *
+//  * @param {string} like - whether or not the user liked the post
+//  * @return {FreetResponse} - the updated freet
+//  * @throws {403} - if the user is not logged in or not the author of
+//  *                 of the freet
+//  * @throws {404} - If the freetId is not valid
+//  * @throws {400} - If the freet content is empty or a stream of empty spaces
+//  * @throws {413} - If the freet content is more than 140 characters long
+//  */
+// router.put(
+//   '/:freetId?',
+//   [
+//     userValidator.isUserLoggedIn,
+//     freetValidator.isFreetExists,
+//   ],
+//   async (req: Request, res: Response) => {
+//     const freet = await FreetCollection.updateOne(req.params.freetId, req.body.content);
+//     res.status(200).json({
+//       message: 'Your freet was updated successfully.',
+//       freet: util.constructFreetResponse(freet)
+//     });
+//   }
+// );
 
 export {router as freetRouter};

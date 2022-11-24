@@ -206,7 +206,7 @@ export {
   isAuthorExists,
   isValidUsername,
   isValidPassword,
-  isUsernameExists,
+  // isUsernameExists,
   isUsernameExistsBody,
   isUsernameExistsQuery,
   isUsernameExistsParams

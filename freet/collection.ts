@@ -3,6 +3,9 @@ import type {Freet} from './model';
 import FreetModel from './model';
 import UserCollection from '../user/collection';
 import { Sort } from '../feed/model';
+import LikeModel from 'like/model';
+import LikeCollection from 'like/collection';
+import * as util from './util';
 
 /**
  * This files contains a class that has the functionality to explore freets
@@ -27,10 +30,6 @@ class FreetCollection {
       dateCreated: date,
       content,
       dateModified: date,
-      reacts:[],
-      views:[],
-      numViews:0,
-      numReacts:0,
     });
     await freet.save(); // Saves freet to MongoDB
     return freet.populate('authorId');
@@ -98,40 +97,46 @@ class FreetCollection {
     else if (sort === Sort.dateReversed) {
       return FreetModel.find({authorId: {$in: userIds}}).sort({dateModified:1}).populate('authorId');
     }
-    else if (sort === Sort.views) {
-      return FreetModel.find({authorId: {$in: userIds}}).sort({numViews: 1}).populate('authorId');
-    }
-    else if (sort === Sort.reacts) {
-      return FreetModel.find({authorId: {$in: userIds}}).sort({numReacts: 1}).populate('authorId');
+
+    else if (sort === Sort.likes) {
+      const freets = await FreetModel.find({authorId: {$in: userIds}}).populate('authorId');
+      const freetArray = []
+      for (const freet in freets) {
+        freetArray.push(freet)
+      }
+      // const numLikes = await freets.map(async freet =>(await LikeCollection.findAllLikesUsername(freet._id)).length)
+      // freetArray.sort(async freet => await Promise.resolve(await util.getNumLikes(freet)))
+      // const sorted = freets.sort(async freets => (await Promise.all(freets.map(async freet => LikeCollection.findAllLikesUsername(freet._id)))).length);
     }
     return FreetModel.find({authorId: {$in: userIds}}).sort({dateModified:-1}).populate('authorId');
   }
 
-  /**
-   * Get all the freets in by a group of accounts and sorts them in the given manor
-   *
-   * @param {string} usernames - The usernames of accounts freets are being requested from
-   * @return {Promise<HydratedDocument<Freet>[]>} - An array of all of the freets by accounts with a username
-   */
-   static async findAllByIdAndSortUnviewed(userId:Types.ObjectId | string, userIds: Array<string | Types.ObjectId>, sort:Sort): Promise<HydratedDocument<Freet>[]> {
-    // const userIds = [];
-    // for (const username in usernames) {
-    //   userIds.push((await UserCollection.findOneByUsername(username))._id);
-    // }
-    if (sort === Sort.date) {
-      return FreetModel.find({authorId: {$in: userIds}}, {$not: {views:userId}}).sort({dateModified:-1}).populate('authorId');
-    }
-    else if (sort === Sort.dateReversed) {
-      return FreetModel.find({authorId: {$in: userIds}}, {$not: {views:userId}}).sort({dateModified:1}).populate('authorId');
-    }
-    else if (sort === Sort.views) {
-      return FreetModel.find({authorId: {$in: userIds}}, {$not: {views:userId}}).sort({numViews: 1}).populate('authorId');
-    }
-    else if (sort === Sort.reacts) {
-      return FreetModel.find({authorId: {$in: userIds}}, {$not: {views:userId}}).sort({numReacts: 1}).populate('authorId');
-    }
-    return FreetModel.find({authorId: {$in: userIds}}, {$not: {views:userId}}).sort({dateModified:-1}).populate('authorId');
-  }
+
+  // /**
+  //  * Get all the freets in by a group of accounts and sorts them in the given manor
+  //  *
+  //  * @param {string} usernames - The usernames of accounts freets are being requested from
+  //  * @return {Promise<HydratedDocument<Freet>[]>} - An array of all of the freets by accounts with a username
+  //  */
+  //  static async findAllByIdAndSortUnviewed(userId:Types.ObjectId | string, userIds: Array<string | Types.ObjectId>, sort:Sort): Promise<HydratedDocument<Freet>[]> {
+  //   // const userIds = [];
+  //   // for (const username in usernames) {
+  //   //   userIds.push((await UserCollection.findOneByUsername(username))._id);
+  //   // }
+  //   if (sort === Sort.date) {
+  //     return FreetModel.find({authorId: {$in: userIds}}, {$not: {views:userId}}).sort({dateModified:-1}).populate('authorId');
+  //   }
+  //   else if (sort === Sort.dateReversed) {
+  //     return FreetModel.find({authorId: {$in: userIds}}, {$not: {views:userId}}).sort({dateModified:1}).populate('authorId');
+  //   }
+  //   else if (sort === Sort.views) {
+  //     return FreetModel.find({authorId: {$in: userIds}}, {$not: {views:userId}}).sort({numViews: 1}).populate('authorId');
+  //   }
+  //   else if (sort === Sort.likes) {
+  //     return FreetModel.find({authorId: {$in: userIds}}, {$not: {views:userId}}).sort({numLikes: 1}).populate('authorId');
+  //   }
+  //   return FreetModel.find({authorId: {$in: userIds}}, {$not: {views:userId}}).sort({dateModified:-1}).populate('authorId');
+  // }
 
   // /**
   //  * return a sorted list of freets sorted using a given method
@@ -170,7 +175,7 @@ class FreetCollection {
    * @param {string} content - The new content of the freet
    * @return {Promise<HydratedDocument<Freet>>} - The newly updated freet
    */
-  static async addReaction(freetId: Types.ObjectId | string, content: string): Promise<HydratedDocument<Freet>> {
+  static async addLike(freetId: Types.ObjectId | string, content: string): Promise<HydratedDocument<Freet>> {
     const freet = await FreetModel.findOne({_id: freetId});
     freet.content = content;
     freet.dateModified = new Date();

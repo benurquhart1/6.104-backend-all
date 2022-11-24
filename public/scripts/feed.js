@@ -11,6 +11,15 @@ function viewFeedFreetsSorted(fields) {
     .catch(showResponse);
 }
 
-// export {
-//   viewFeedFreetsSorted
+function changeFeedSort(fields) {
+  fetch(`/api/feed/${fields.name}`, {method: 'PUT', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+    .then(showResponse)
+    .catch(showResponse);
+}
+
+// function editFreet(fields) {
+//   fetch(`/api/freets/${fields.id}`, {method: 'PUT', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+//     .then(showResponse)
+//     .catch(showResponse);
 // }
+

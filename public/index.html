@@ -12,6 +12,9 @@
   <script src="/scripts/favorite.js"></script>
   <script src="/scripts/friend.js"></script>
   <script src="/scripts/feed.js"></script>
+  <script src="/scripts/like.js"></script>
+  <script src="/scripts/contentGroup.js"></script>
+
 </head>
 
 <body>
@@ -117,7 +120,7 @@
           <input type="submit" value="Create Freet">
         </form>
 
-        <form id="edit-freet">
+        <!-- <form id="edit-freet">
           <h3>Edit Freet</h3>
           <div>
             <label for="id">ID:</label>
@@ -128,7 +131,7 @@
             <textarea id="content" name="content"></textarea>
           </div>
           <input type="submit" value="Edit Freet">
-        </form>
+        </form> -->
 
         <form id="delete-freet">
           <h3>Delete Freet</h3>
@@ -227,6 +230,98 @@
             <input id="name" name="name">
           </div>
           <input type="submit" value="view feed with specific name">
+        </form>
+
+        <form id="change-feed-sort">
+          <h3>change the sort of a feed</h3>
+          <div>
+            <label for="name">feed name:</label>
+            <input id="name" name="name">
+          </div>
+          <div>
+            <label for="sort">sort (number):</label>
+            <input id="sort" name="sort">
+          </div>
+          <input type="submit" value="change sort">
+        </form>
+
+        <form id="like-freet">
+          <h3>like a freet with a given id</h3>
+          <div>
+            <label for="freetId">freet id:</label>
+            <input id="freetId" name="freetId">
+          </div>
+          <input type="submit" value="like freet">
+        </form>
+
+        <form id="unlike-freet">
+          <h3>unlike a freet with a given id</h3>
+          <div>
+            <label for="freetId">freet id:</label>
+            <input id="freetId" name="freetId">
+          </div>
+          <input type="submit" value="unlike freet">
+        </form>
+
+        <form id="view-likes">
+          <h3>view the likes for a freet with a given id</h3>
+          <div>
+            <label for="freetId">freet id:</label>
+            <input id="freetId" name="freetId">
+          </div>
+          <input type="submit" value="view likes">
+        </form>
+
+        <form id="create-content-group">
+          <h3>Make a content group</h3>
+          <div>
+            <label for="name">group name:</label>
+            <input id="name" name="name">
+          </div>
+          <input type="submit" value="create content group">
+        </form>
+
+        <form id="delete-content-group">
+          <h3>delete a content group</h3>
+          <div>
+            <label for="name">group name:</label>
+            <input id="name" name="name">
+          </div>
+          <input type="submit" value="delete content group">
+        </form>
+
+        <form id="get-content-group">
+          <h3>get a content group</h3>
+          <div>
+            <label for="name">group name:</label>
+            <input id="name" name="name">
+          </div>
+          <input type="submit" value="get content group">
+        </form>
+
+        <form id="update-content-group">
+          <h3>update a countent group</h3>
+          <div>
+            <label for="name">group name:</label>
+            <input id="name" name="name">
+          </div>
+          <div>
+            <label for="addModarator">addModarator:</label>
+            <input id="addModarator" name="addModarator">
+          </div>
+          <div>
+            <label for="removeModerator">removeModerator:</label>
+            <input id="removeModerator" name="removeModerator">
+          </div>
+          <div>
+            <label for="addAccount">addAccount:</label>
+            <input id="addAccount" name="addAccount">
+          </div>
+          <div>
+            <label for="removeAccount">removeAccount:</label>
+            <input id="removeAccount" name="removeAccount">
+          </div>
+          <input type="submit" value="update content group">
         </form>
 
       </div>

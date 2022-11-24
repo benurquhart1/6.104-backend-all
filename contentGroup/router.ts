@@ -1,152 +1,129 @@
-import type {Request, Response} from 'express';
+import type {NextFunction, Request, Response} from 'express';
 import express from 'express';
-import FreetCollection from '../freet/collection';
-import UserCollection from '../user/collection';
+import ContentGroupCollection from './collection';
 import * as userValidator from '../user/middleware';
+import * as contentGroupValidator from './middleware';
 import * as util from './util';
+import FeedCollection from '../feed/collection';
+import ContentGroupModel from './model';
+import UserCollection from '../user/collection';
 
 const router = express.Router();
 
 /**
- * Sign in user.
+ * Get a the usernames that a user is following and followed by
  *
- * @name POST /api/users/session
+ * @name GET /api/follow?username=username
  *
- * @param {string} username - The user's username
- * @param {string} password - The user's password
- * @return {UserResponse} - An object with user's details
- * @throws {403} - If user is already signed in
- * @throws {400} - If username or password is  not in the correct format,
- *                 or missing in the req
- * @throws {401} - If the user login credentials are invalid
+ * @return {ContentGroupResponse} - an object containing the usernames that a user is following and followed by
+ * @throws {404} - If no content group with that name exists
  *
  */
-router.post(
-  '/session',
-  [
-    userValidator.isUserLoggedOut,
-    userValidator.isValidUsername,
-    userValidator.isValidPassword,
-    userValidator.isAccountExists
-  ],
-  async (req: Request, res: Response) => {
-    const user = await UserCollection.findOneByUsernameAndPassword(
-      req.body.username, req.body.password
-    );
-    req.session.userId = user._id.toString();
-    res.status(201).json({
-      message: 'You have logged in successfully',
-      user: util.constructUserResponse(user)
-    });
-  }
-);
-
-/**
- * Sign out a user
- *
- * @name DELETE /api/users/session
- *
- * @return - None
- * @throws {403} - If user is not logged in
- *
- */
-router.delete(
-  '/session',
-  [
-    userValidator.isUserLoggedIn
-  ],
-  (req: Request, res: Response) => {
-    req.session.userId = undefined;
-    res.status(200).json({
-      message: 'You have been logged out successfully.'
-    });
-  }
-);
-
-/**
- * Create a user account.
- *
- * @name POST /api/users
- *
- * @param {string} username - username of user
- * @param {string} password - user's password
- * @param {Date} birthday - the user's birthday
- * @return {UserResponse} - The created user
- * @throws {403} - If there is a user already logged in
- * @throws {409} - If username is already taken
- * @throws {400} - If password or username is not in correct format
- *
- */
-router.post(
+router.get(
   '/',
   [
-    userValidator.isUserLoggedOut,
-    userValidator.isValidUsername,
-    userValidator.isUsernameNotAlreadyInUse,
-    userValidator.isValidPassword
+    contentGroupValidator.isNameExistsQuery,
   ],
   async (req: Request, res: Response) => {
-    const user = await UserCollection.addOne(req.body.username, req.body.password, req.body.birthday);
-    req.session.userId = user._id.toString();
-    res.status(201).json({
-      message: `Your account was created successfully. You have been logged in as ${user.username}`,
-      user: util.constructUserResponse(user)
-    });
+    const contentGroup = await ContentGroupCollection.findOne(req.query.name as string);
+    const response = util.constructContentGroupResponse(contentGroup);
+    res.status(200).json(response);
   }
 );
 
 /**
- * Update a user's profile.
+ * Creates a content group
  *
- * @name PUT /api/users
+ * @name POST /api/contentGroup
  *
- * @param {string} username - The user's new username
- * @param {string} password - The user's new password
- * @return {UserResponse} - The updated user
- * @throws {403} - If user is not logged in
- * @throws {409} - If username already taken
- * @throws {400} - If username or password are not of the correct format
+ * @param {string} name - The name of the content group
+ * @return {string} - A success message
+ * @throws {403} - If the user is not logged in
+ * @throws {400} - If content group name is not given
+ * @throws {409} - If the content group name is already in use
  */
-router.put(
+router.post(
   '/',
   [
     userValidator.isUserLoggedIn,
-    userValidator.isValidUsername,
-    userValidator.isUsernameNotAlreadyInUse,
-    userValidator.isValidPassword
+    // contentGroupValidator.isNameExistsBody,
+    contentGroupValidator.isNameNotAlreadyInUse,
   ],
   async (req: Request, res: Response) => {
-    const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    const user = await UserCollection.updateOne(userId, req.body);
-    res.status(200).json({
-      message: 'Your profile was updated successfully.',
-      user: util.constructUserResponse(user)
+    const group = await ContentGroupCollection.addOne(req.body.name as string,req.session.userId as string,"");
+    await FeedCollection.addOne(req.session.userId,req.body.name as string);
+    res.status(201).json({
+      message: `you have successfully created the content group ${req.body.name as string}`,
+      contentFroup: util.constructContentGroupResponse(group)
     });
   }
 );
 
+
 /**
- * Delete a user.
+ * Modify a content group
  *
- * @name DELETE /api/users
+ * @name PUT /api/contentGroup/:name
+ *
+ * @param {string} addModerator - a moderator to be added
+ * @param {string} removeModerator - a moderator to be removed
+ * @param {string} addAccount - a account to be added
+ * @param {string} addAccount - a account to be removed
+ * @return {ContentGroupResponse} - the updated freet
+ * @throws {403} - if the user is not logged in or not the author of
+ *                 of the freet
+ * @throws {404} - If the freetId is not valid
+ * @throws {400} - If the freet content is empty or a stream of empty spaces
+ * @throws {413} - If the freet content is more than 140 characters long
+ */
+router.put(
+  '/:name?',
+  [
+    userValidator.isUserLoggedIn,
+    contentGroupValidator.isNameExistsParams,
+    contentGroupValidator.isModerator,
+  ],
+  async (req: Request, res: Response) => {
+    const group = await ContentGroupCollection.updateOne(req.params.name, req.body);
+    res.status(200).json({
+      message: 'Your content group was updated successfully.',
+      user: util.constructContentGroupResponse(group)
+    });
+  }
+);
+
+
+/**
+ * Delete a content group
+ *
+ * @name DELETE /api/contentGroup/:name
  *
  * @return {string} - A success message
  * @throws {403} - If the user is not logged in
+ * @throws {403} - If the user is not the owner 
+ * @throws {400} - If username is not given
+ * @throws {404} - If no user has given username
+ * @throws {405} - If you already do not follow the user
  */
 router.delete(
-  '/',
+  '/:name',
   [
-    userValidator.isUserLoggedIn
+    userValidator.isUserLoggedIn,
+    // contentGroupValidator.isNameExistsParams,
+    contentGroupValidator.isOwner
   ],
   async (req: Request, res: Response) => {
-    const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    await UserCollection.deleteOne(userId);
-    await FreetCollection.deleteMany(userId);
-    req.session.userId = undefined;
+    const group = await ContentGroupModel.findOne({name:req.params.name});
+    // for (const follower in group.followers) {
+    //   const followerId = (await UserCollection.findOneByUsername(follower))._id
+    //   await FeedCollection.deleteOne(follower,req.params.name as string);
+    //   // await FollowGroupCollection.removeOne()
+    // }
+    ContentGroupCollection.deleteOne(req.params.name);
     res.status(200).json({
-      message: 'Your account has been deleted successfully.'
+      message: `you have deleted the content group ${req.params.name}`
     });
   }
 );
 
-export {router as userRouter};
+export {router as contentGroupRouter};

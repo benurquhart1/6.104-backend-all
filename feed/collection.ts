@@ -26,7 +26,6 @@ class FeedCollection {
       userId:userId,
       accounts:[],
       sort:Sort.date,
-      showViewedFreets: false,
     });
     await feed.save();
     return FeedModel.findOne({userId:userId,name:name}).populate("userId").populate('accounts');
@@ -122,20 +121,7 @@ class FeedCollection {
     const feed = await FeedModel.findOne({userId:userId, name:name, accounts:accountId});
     return feed !== null;
   }
-
-  // /**
-  //  * Set up a feed object for user with s given userId
-  //  *
-  //  * @param {Types.ObjectId | string} userId - the id of the user
-  //  * @param {string} name - the name of the feed
-  //  * @return {Promise<HydratedDocument<Feed>} - the feed object
-  //  */
-  // static async getFreets(userId: Types.ObjectId | string, name:string): Promise<Array<PopulatedFreet>> {
-  //   const feed = await FeedModel.findOne({userId:userId,name:name});
-  //   const freets = FreetCollection.
-  // }
-
-}
+};
 
 
 

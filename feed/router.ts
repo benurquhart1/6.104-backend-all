@@ -20,6 +20,7 @@ const router = express.Router();
 router.get(
   '/',
   [
+    userValidator.isUserLoggedIn,
     feedValidator.isNameExistsQuery,
   ],
   async (req: Request, res: Response) => {
@@ -44,11 +45,12 @@ router.post(
   '/',
   [
     userValidator.isUserLoggedIn,
-    feedValidator.isNamePresentBody,
+    // feedValidator.isNamePresentBody,
     feedValidator.isNotNameExists,
+    feedValidator.isNameExistsBody,
   ],
   async (req: Request, res: Response) => {
-    const feedObject = await FeedCollection.addOne(req.query.userId as string, req.params.name as string);
+    const feedObject = await FeedCollection.addOne(req.query.userId as string, req.body.name as string);
     const response = await util.constructFeedResponse(feedObject);
     res.status(200).json(response);
   }
@@ -68,8 +70,7 @@ router.delete(
   '/:name?',
   [
     userValidator.isUserLoggedIn,
-    feedValidator.isNamePresentBody,
-    feedValidator.isNotNameExists,
+    feedValidator.isNameExists,
   ],
   async (req: Request, res: Response) => {
     await FeedCollection.deleteOne(req.session.userId as string, req.params.name as string);
@@ -97,8 +98,7 @@ router.put(
   '/',
   [
     userValidator.isUserLoggedIn,
-    feedValidator.isNameExists,
-    feedValidator.isNamePresentBody,
+    feedValidator.isNameExistsBody,
   ],
   async (req: Request, res: Response) => {
     const addAccounts = req.body.addAccounts ? JSON.parse(req.body.addAccounts) as Array<string> : [];
@@ -115,9 +115,10 @@ router.put(
       await FeedCollection.setSort(userId,name, req.body.sort);
     }
     const feed = await FeedCollection.findOne(userId,name);
+    const feedResponse = await util.constructFeedResponse(feed)
     res.status(200).json({
       message: 'Your feed has been updated',
-      feed: feed
+      feed: feedResponse,
     });
   }
 );

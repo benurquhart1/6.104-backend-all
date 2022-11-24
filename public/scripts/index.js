@@ -1,4 +1,3 @@
-// import * as Follow from './follow.js';
 
 // Show an object on the screen.
 function showObject(obj) {
@@ -39,7 +38,7 @@ const formsAndHandlers = {
   'view-all-freets': viewAllFreets,
   'view-freets-by-author': viewFreetsByAuthor,
   'create-freet': createFreet,
-  'edit-freet': editFreet,
+  // 'edit-freet': editFreet,
   'delete-freet': deleteFreet,
   'follow-user': followUser,
   'unfollow-user': unfollowUser,
@@ -51,6 +50,14 @@ const formsAndHandlers = {
   'view-favorites-of-user':viewFavoriting,
   'view-friends-of-user':viewFriendsandFriending,
   'view-feed':viewFeedFreetsSorted,
+  'change-feed-sort':changeFeedSort,
+  'view-likes':getLikes,
+  'like-freet':likeFreet,
+  'unlike-freet':unlikeFreet,
+  'create-content-group':createContentGroup,
+  'delete-content-group':deleteContentGroup,
+  'get-content-group':getContentGroup,
+  'update-content-group':updateContentGroup,
 };
 
 // Attach handlers to forms

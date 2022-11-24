@@ -11,7 +11,6 @@ import { User } from 'user/model';
 export type ContentGroup = {
   _id: Types.ObjectId; // MongoDB assigns each object this ID on creation
   name: string;
-  isPublic:Boolean;
   description:string;
   owner:Schema.Types.ObjectId;
   moderators:Array<Schema.Types.ObjectId>;
@@ -21,8 +20,8 @@ export type ContentGroup = {
 
 export type PopulatedContentGroup = {
   _id: Types.ObjectId; // MongoDB assigns each object this ID on creation
+  // groupName:string;
   name: string;
-  isPublic:Boolean;
   description:string;
   owner:User;
   moderators:Array<User>;
@@ -37,11 +36,6 @@ const ContentGroupSchema = new Schema({
   // The name of the content group
   name: {
     type: String,
-    required: true
-  },
-  // a boolean representing whether the content group is public or private
-  isPublic: {
-    type: Boolean,
     required: true
   },
   // a discription of the content group

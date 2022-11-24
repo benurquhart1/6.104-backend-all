@@ -1,89 +1,27 @@
 import type {Request, Response, NextFunction} from 'express';
 import {Types} from 'mongoose';
 import UserCollection from '../user/collection';
+import ContentGroupCollection from './collection';
+import ContentGroupModel from './model';
 
-/**
- * Checks if the current session user (if any) still exists in the database, for instance,
- * a user may try to post a freet in some browser while the account has been deleted in another or
- * when a user tries to modify an account in some browser while it has been deleted in another
- */
-const isCurrentSessionUserExists = async (req: Request, res: Response, next: NextFunction) => {
-  if (req.session.userId) {
-    const user = await UserCollection.findOneByUserId(req.session.userId);
-
-    if (!user) {
-      req.session.userId = undefined;
-      res.status(500).json({
-        error: {
-          userNotFound: 'User session was not recognized.'
-        }
-      });
-      return;
-    }
-  }
-
-  next();
-};
-
-/**
- * Checks if a username in req.body is valid, that is, it matches the username regex
- */
-const isValidUsername = (req: Request, res: Response, next: NextFunction) => {
-  const usernameRegex = /^\w+$/i;
-  if (!usernameRegex.test(req.body.username)) {
-    res.status(400).json({
-      error: {
-        username: 'Username must be a nonempty alphanumeric string.'
-      }
-    });
-    return;
-  }
-
-  next();
-};
-
-/**
- * Checks if a password in req.body is valid, that is, at 6-50 characters long without any spaces
- */
-const isValidPassword = (req: Request, res: Response, next: NextFunction) => {
-  const passwordRegex = /^\S+$/;
-  if (!passwordRegex.test(req.body.password)) {
-    res.status(400).json({
-      error: {
-        password: 'Password must be a nonempty string.'
-      }
-    });
-    return;
-  }
-
-  next();
-};
-
-/**
- * Checks if a user with username and password in req.body exists
- */
-const isAccountExists = async (req: Request, res: Response, next: NextFunction) => {
-  const {username, password} = req.body as {username: string; password: string};
-
-  if (!username || !password) {
-    res.status(400).json({error: `Missing ${username ? 'password' : 'username'} credentials for sign in.`});
-    return;
-  }
-
-  const user = await UserCollection.findOneByUsernameAndPassword(
-    username, password
-  );
-
-  if (user) {
-    next();
-  } else {
-    res.status(401).json({error: 'Invalid user login credentials provided.'});
-  }
-};
 
 /**
  * Checks if a username in req.body is already in use
  */
+const isNameNotAlreadyInUse = async (req: Request, res: Response, next: NextFunction) => {
+  const user = await UserCollection.findOneByUsername(req.body.name as string);
+  const group = await ContentGroupCollection.findOne(req.body.name as string);
+  if (!user && !group) {
+    next();
+    return;
+  }
+  res.status(409).json({
+    error: {
+      nameInUse: 'The group name is already in use'
+    }
+  });
+};
+
 const isUsernameNotAlreadyInUse = async (req: Request, res: Response, next: NextFunction) => {
   const user = await UserCollection.findOneByUsername(req.body.username);
 
@@ -101,111 +39,87 @@ const isUsernameNotAlreadyInUse = async (req: Request, res: Response, next: Next
   });
 };
 
+
+
 /**
- * Checks if a username exists
+ * Checks if a name exists
  * helper function for other methods that are specific to the location of the username
  */
- const isUsernameExists = async (username: string, res: Response, next: NextFunction) => {
-  if (!username) {
+ const isNameExists = async (name: string, res: Response, next: NextFunction) => {
+  if (!name) {
     res.status(400).json({
       error: 'Provided username must be nonempty.'
     });
     return;
   }
-
-  const user = await UserCollection.findOneByUsername(req.query.username as string);
-  if (!user) {
+  const group = await ContentGroupCollection.findOne(name as string);
+  if (!group) {
     res.status(404).json({
-      error: `A user with username ${req.query.username as string} does not exist.`
+      error: `A group with name ${name as string} does not exist.`
     });
     return;
   }
-
   next();
 };
 
 /**
  * Checks if a username in req.body exists
  */
- const isUsernameExists = async (username: string, res: Response, next: NextFunction) => {
-  if (!username) {
-    res.status(400).json({
-      error: 'Provided username must be nonempty.'
-    });
-    return;
-  }
-
-  const user = await UserCollection.findOneByUsername(req.query.username as string);
-  if (!user) {
-    res.status(404).json({
-      error: `A user with username ${req.query.username as string} does not exist.`
-    });
-    return;
-  }
-
-  next();
+const isNameExistsBody = async (req: Request, res: Response, next: NextFunction) => {
+  isNameExists((req.body.name as string) ?? '', res, next);
 };
 
 /**
- * Checks if the user is logged in, that is, whether the userId is set in session
+ * Checks if a username in req.query exists
  */
-const isUserLoggedIn = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.session.userId) {
+ const isNameExistsQuery = async (req: Request, res: Response, next: NextFunction) => {
+  isNameExists((req.query.name as string) ?? '', res, next);
+};
+
+/**
+ * Checks if a username in req.query exists
+ */
+ const isNameExistsParams = async (req: Request, res: Response, next: NextFunction) => {
+  isNameExists((req.params.name as string) ?? '', res, next);
+};
+
+/**
+ * Checks if a user is a moderator for the group
+ */
+const isModerator = async (req: Request, res: Response, next: NextFunction) => {
+  const result = ContentGroupCollection.isModerator(req.params.name,req.session.userId);
+  if (!result) {
     res.status(403).json({
       error: {
-        auth: 'You must be logged in to complete this action.'
+        notModerator: `You are not a moderator for the group`
       }
     });
     return;
   }
-
   next();
 };
 
 /**
- * Checks if the user is signed out, that is, userId is undefined in session
+ * Checks if a user is a moderator for the group
  */
-const isUserLoggedOut = (req: Request, res: Response, next: NextFunction) => {
-  if (req.session.userId) {
+ const isOwner = async (req: Request, res: Response, next: NextFunction) => {
+  const result = ContentGroupCollection.isOwner(req.params.name,req.session.userId);
+  if (!result) {
     res.status(403).json({
-      error: 'You are already signed in.'
+      error: {
+        notOwner: `You are not the owner of the group`
+      }
     });
     return;
   }
-
-  next();
-};
-
-/**
- * Checks if a user with userId as author id in req.query exists
- */
-const isAuthorExists = async (req: Request, res: Response, next: NextFunction) => {
-  if (!req.query.author) {
-    res.status(400).json({
-      error: 'Provided author username must be nonempty.'
-    });
-    return;
-  }
-
-  const user = await UserCollection.findOneByUsername(req.query.author as string);
-  if (!user) {
-    res.status(404).json({
-      error: `A user with username ${req.query.author as string} does not exist.`
-    });
-    return;
-  }
-
   next();
 };
 
 export {
-  isCurrentSessionUserExists,
-  isUserLoggedIn,
-  isUserLoggedOut,
-  isUsernameNotAlreadyInUse,
-  isAccountExists,
-  isAuthorExists,
-  isValidUsername,
-  isValidPassword,
-  isUsernameExists
+  isNameNotAlreadyInUse,
+  isNameExistsBody,
+  isNameExistsParams,
+  isNameExistsQuery,
+  isModerator,
+  isOwner,
 };

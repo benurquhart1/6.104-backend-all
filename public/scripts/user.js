@@ -109,3 +109,52 @@ function viewFeedFreetsSorted(fields) {
     .then(showResponse)
     .catch(showResponse);
 }
+
+function changeFeedSort(fields) {
+  fetch(`/api/feed`, {method: 'PUT', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+    .then(showResponse)
+    .catch(showResponse);
+}
+
+
+function getLikes(fields) {
+  fetch(`/api/like?freetId=${fields.freetId}`)
+    .then(showResponse)
+    .catch(showResponse);
+}
+
+function likeFreet(fields) {
+  fetch('/api/like', {method: 'POST', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+    .then(showResponse)
+    .catch(showResponse);
+}
+
+function unlikeFreet(fields) {
+  fetch(`/api/like/${fields.freetId}`, {method: 'DELETE'})
+    .then(showResponse)
+    .catch(showResponse);
+}
+
+function createContentGroup(fields) {
+  fetch(`/api/contentGroup`, {method: 'POST', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+    .then(showResponse)
+    .catch(showResponse);
+}
+
+function deleteContentGroup(fields) {
+  fetch(`/api/contentGroup/${fields.name}`, {method: 'DELETE'})
+    .then(showResponse)
+    .catch(showResponse);
+}
+
+function getContentGroup(fields) {
+  fetch(`/api/contentGroup?name=${fields.name}`)
+    .then(showResponse)
+    .catch(showResponse);
+}
+
+function updateContentGroup(fields) {
+  fetch(`/api/contentGroup/${fields.name}`, {method: 'PUT', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+    .then(showResponse)
+    .catch(showResponse);
+}

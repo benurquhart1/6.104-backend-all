@@ -3,7 +3,6 @@ import type {Favorite, PopulatedFavorite} from '../favorite/model';
 
 // Update this if you add a property to the Freet type!
 type FavoriteResponse = {
-  _id: string;
   username: string;
   favorites: Array<string>;
 };
@@ -24,7 +23,6 @@ const constructFavoriteResponse = (favorite: HydratedDocument<Favorite>): Favori
   const username:string = favoriteCopy.userId.username;
   const favorites:Array<string> = favoriteCopy.favorites.map(user => user.username);
   return {
-    _id:favoriteCopy._id.toString(),
     username:username,
     favorites:favorites
   };

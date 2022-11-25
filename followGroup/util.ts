@@ -1,33 +1,38 @@
+import ContentGroupCollection from '../contentGroup/collection';
+import ContentGroupModel from '../contentGroup/model';
 import type {HydratedDocument} from 'mongoose';
-import type {Favorite, PopulatedFavorite} from '../favorite/model';
+import type {FollowGroup, PopulatedFollowGroup} from '../followGroup/model';
 
 // Update this if you add a property to the Freet type!
-type FavoriteResponse = {
+type FollowGroupResponse = {
   username: string;
-  favorites: Array<string>;
+  followGroupNames: Array<string>;
+  followGroupIds: Array<string>;
 };
 
 /**
- * Transform a raw favorite object from the database into an object
+ * Transform a raw followGroup object from the database into an object
  * with all the information needed by the frontend
  *
- * @param {HydratedDocument<favorite>} favorite - A favorite object
- * @returns {FavoriteResponse} - The favorite object formatted for the frontend
+ * @param {HydratedDocument<followGroup>} followGroup - A followGroup object
+ * @returns {FollowGroupResponse} - The followGroup object formatted for the frontend
  */
-const constructFavoriteResponse = (favorite: HydratedDocument<Favorite>): FavoriteResponse => {
-  const favoriteCopy: PopulatedFavorite = {
-    ...favorite.toObject({
+const constructFollowGroupResponse = (followGroup: HydratedDocument<FollowGroup>): FollowGroupResponse => {
+  const followGroupCopy: PopulatedFollowGroup = {
+    ...followGroup.toObject({
       versionKey: false // Cosmetics; prevents returning of __v property
     })
   };
-  const username:string = favoriteCopy.userId.username;
-  const favorites:Array<string> = favoriteCopy.favorites.map(user => user.username);
+  const username:string = followGroupCopy.userId.username;
+  const followGroupNames:Array<string> = followGroupCopy.followGroups.map(group => group.name);
+  const followGroupIds:Array<string> = followGroupCopy.followGroups.map(group => group._id.toString());
   return {
     username:username,
-    favorites:favorites
+    followGroupNames:followGroupNames,
+    followGroupIds:followGroupIds,
   };
 };
 
 export {
-  constructFavoriteResponse
+  constructFollowGroupResponse
 };

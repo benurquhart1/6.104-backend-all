@@ -1,3 +1,4 @@
+import { ContentGroup } from '../contentGroup/model';
 import type {Types, PopulatedDoc, Document} from 'mongoose';
 import {Schema, model} from 'mongoose';
 import type {User} from '../user/model';
@@ -8,14 +9,14 @@ import type {User} from '../user/model';
  */
 
 // Type definition for FollowGroup on the backend
-export type ParameterizedFollowGroup<T> = {
+export type ParameterizedFollowGroup<T,G> = {
   _id:Types.ObjectId;
   userId:T;
-  followGroups: Array<T>;
+  followGroups: Array<G>;
 };
 
-export type FollowGroup = ParameterizedFollowGroup<Types.ObjectId>;
-export type PopulatedFollowGroup = ParameterizedFollowGroup<User>;
+export type FollowGroup = ParameterizedFollowGroup<Types.ObjectId,Types.ObjectId>;
+export type PopulatedFollowGroup = ParameterizedFollowGroup<User,ContentGroup>;
 
 // Mongoose schema definition for interfacing with a MongoDB table
 // FollowGroups stored in this table will have these fields, with the
@@ -31,7 +32,7 @@ const FollowGroupSchema = new Schema<FollowGroup>({
   followGroups: [{
     type: Schema.Types.ObjectId,
     required: true,
-    ref: 'User'
+    ref: 'ContentGroup'
   }],
 
 });

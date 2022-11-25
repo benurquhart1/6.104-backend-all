@@ -3,7 +3,7 @@ import FollowGroupCollection from '../followGroup/collection';
 import type {HydratedDocument, Types} from 'mongoose';
 import UserCollection from '../user/collection';
 import UserModel from '../user/model';
-import type {ContentGroup} from './model';
+import type {ContentGroup, PopulatedContentGroup} from './model';
 import ContentGroupModel from './model';
 
 /**
@@ -50,17 +50,37 @@ class ContentGroupCollection {
   }
 
   /**
+   * finds a content group with a given name
+   *
+   * @param {string} name - The name of the content group
+   * @return {Promise<HydratedDocument<ContentGroup>> | Promise<null>} - The ContentGroup with the given ContentGroupname, if any
+   */
+  static async findOnePopulated(name:string): Promise<HydratedDocument<PopulatedContentGroup>> {
+    return ContentGroupModel.findOne({name:name}).populate("owner").populate('followers').populate('moderators').populate('accounts');
+  }
+
+  /**
+   * finds the followers of a content group
+   *
+   * @param {string} name - The name of the content group
+   * @return {Promise<HydratedDocument<ContentGroup>> | Promise<null>} - The ContentGroup with the given ContentGroupname, if any
+   */
+  static async findfollowers(name:string): Promise<Types.ObjectId[]> {
+    const group = await ContentGroupModel.findOne({name:name});
+    return group.followers;
+  }
+
+  /**
    * deletes a content group with a given name
    *
    * @param {string} name - The name of the content group
    */
   static async deleteOne(name:string): Promise<void> {
     const group = await ContentGroupModel.findOne({name:name});
-    for (const follower in group.followers) {
-      const followerId = (await UserCollection.findOneByUsername(follower))._id
-      await FeedCollection.deleteOne(follower,name);
+    // for (const follower in group.followers) {
+    await Promise.all(group.followers.map(async follower => await FeedCollection.deleteOne(follower,name)));
       // await FollowGroupCollection.removeOne()
-    }
+    // }
     await ContentGroupModel.deleteOne({name:name});
   }
 
@@ -119,11 +139,11 @@ class ContentGroupCollection {
    * @param {string} account - the username of the account being added to the account
    */
   static async addAccount(name:string, account: string): Promise<void> {
-    const group = await ContentGroupModel.findOne({name:name})
+    const group = await this.findOnePopulated(name);
     const accountId = (await UserCollection.findOneByUsername(account))._id;
     await ContentGroupModel.updateOne({name:name},{$addToSet: {accounts:accountId}});
-    for (const following in group.followers) {
-      await FeedCollection.addOneAccount(following,name,account);
+    for (const follower in this.findfollowers(name)) {
+      await FeedCollection.addOneAccountById(follower,name,accountId);
     }
   }
 
@@ -134,7 +154,7 @@ class ContentGroupCollection {
    * @param {string} account - the username of the account being added to the account
    */
   static async removeAccount(name:string, account: string): Promise<void> {
-    const group = await ContentGroupModel.findOne({name:name})
+    const group = await this.findOne(name);
     const accountId = (await UserCollection.findOneByUsername(account))._id;
     await ContentGroupModel.updateOne({name:name},{$pull: {accounts:accountId}});
     for (const following in group.followers) {
@@ -152,14 +172,42 @@ class ContentGroupCollection {
     const group = await ContentGroupModel.findOne({name:name})
     const followerId = (await UserCollection.findOneByUsername(follower))._id;
     await ContentGroupModel.updateOne({name:name},{$addToSet: {followers:followerId}});
-    const feed = await FeedCollection.addOne(followerId,name);
-    for (const account in group.accounts) {
-      await FeedCollection.addOneAccount(followerId,name,account)
-    }
+    // const feed = await FeedCollection.addOne(followerId,name);
+    // for (const account in group.accounts) {
+    //   await FeedCollection.addOneAccount(followerId,name,account)
+    // }
   }
 
   /**
    * follow a content group
+   * 
+   * @param {string} name - The name of the content group
+   * @param {string} followerId - the username of the account being added to the account
+   */
+  static async addFollowerById(name:string, followerId: Types.ObjectId |string): Promise<void> {
+    await ContentGroupModel.updateOne({name:name},{$addToSet: {followers:followerId}});
+    // const feed = await FeedCollection.addOne(followerId,name);
+    // for (const account in group.accounts) {
+    //   await FeedCollection.addOneAccount(followerId,name,account)
+    // }
+  }
+
+  /**
+   * follow a content group
+   * 
+   * @param {string} name - The name of the content group
+   * @param {string} followerId - the username of the account being added to the account
+   */
+  static async removeFollowerById(name:string, followerId: Types.ObjectId |string): Promise<void> {
+    await ContentGroupModel.updateOne({name:name},{$pull: {followers:followerId}});
+    // const feed = await FeedCollection.addOne(followerId,name);
+    // for (const account in group.accounts) {
+    //   await FeedCollection.addOneAccount(followerId,name,account)
+    // }
+  }
+
+  /**
+   * unfollow a content group
    * 
    * @param {string} name - The name of the content group
    * @param {string} followerId - the username of the account being added to the account
@@ -169,6 +217,17 @@ class ContentGroupCollection {
     const followerId = (await UserCollection.findOneByUsername(follower))._id;
     await ContentGroupModel.updateOne({name:name},{$pull: {followers:followerId}});
     await FeedCollection.deleteOne(followerId,name);
+  }
+
+  /**
+   * get the followers of a content group
+   * 
+   * @param {string} name - The name of the content group
+   * @returns {Promise<Array<Types.ObjectId | string>>}
+   */
+  static async getFollowers(name:string, follower: string): Promise<Array<Types.ObjectId | string>>{
+    const group = await ContentGroupModel.findOne({name:name})
+    return group.followers;
   }
 
   /**

@@ -8,6 +8,7 @@ type ContentGroupResponse = {
   description:string;
   followers: string[];
   moderators: string[];
+  accounts: string[];
   owner:string;
 };
 
@@ -26,6 +27,7 @@ const constructContentGroupResponse = (group: HydratedDocument<ContentGroup>): C
   };
   const followers = contentGroupCopy.followers.map(follower => follower.toString());
   const moderators = contentGroupCopy.moderators.map(mod => mod.toString());
+  const accounts = contentGroupCopy.accounts.map(account => account.toString());
 
   return {
     _id: contentGroupCopy._id.toString(),
@@ -33,6 +35,7 @@ const constructContentGroupResponse = (group: HydratedDocument<ContentGroup>): C
     description:contentGroupCopy.description,
     followers: followers,
     moderators: moderators,
+    accounts:accounts,
     owner:contentGroupCopy.owner.toString(),
   };
 };

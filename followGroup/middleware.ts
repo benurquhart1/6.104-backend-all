@@ -1,15 +1,17 @@
+import ContentGroupCollection from '../contentGroup/collection';
 import type {Request, Response, NextFunction} from 'express';
-import FavoriteCollection from '../favorite/collection';
+import FollowGroupCollection from '../followGroup/collection';
 
 /**
- * Checks if a user favorites the user with req.params.username
+ * Checks if a user follows the group with name req.params.name
  */
-const isFavoriting = async (req: Request, res: Response, next: NextFunction) => {
-  const favoriting = await FavoriteCollection.checkFavoritingByUsername(req.params.username,req.session.userId);
-  if (!favoriting) {
+const isFollowing = async (req: Request, res: Response, next: NextFunction) => {
+  const groupId = (await ContentGroupCollection.findOne(req.params.name))._id
+  const following = await FollowGroupCollection.checkFollowingById(req.session.userId, groupId);
+  if (!following) {
     res.status(409).json({
       error: {
-        favoriteNotFound: `You do not have ${req.params.username} as a favorite`
+        followNotFound: `You are not following the group ${req.params.name}`
       }
     });
     return;
@@ -18,14 +20,15 @@ const isFavoriting = async (req: Request, res: Response, next: NextFunction) => 
 };
 
 /**
- * Checks if a user is not favoriting the user with req.body.username
+ * Checks if a user is not following the the group with req.params.name
  */
-const isNotFavoriting = async (req: Request, res: Response, next: NextFunction) => {
-  const favoriting = await FavoriteCollection.checkFavoritingByUsername(req.body.username,req.session.userId);
-  if (favoriting) {
+const isNotFollowing = async (req: Request, res: Response, next: NextFunction) => {
+  const groupId = (await ContentGroupCollection.findOne(req.body.name))._id
+  const following = await FollowGroupCollection.checkFollowingById(req.session.userId, groupId);
+  if (following) {
     res.status(409).json({
       error: {
-        favoriteFound: `You already have ${req.body.username} as a favorite`
+        followGroupFound: `You are already following ${req.body.name}`
       }
     });
     return;
@@ -34,6 +37,6 @@ const isNotFavoriting = async (req: Request, res: Response, next: NextFunction) 
 };
 
 export {
-  isFavoriting,
-  isNotFavoriting
+  isFollowing,
+  isNotFollowing
 };

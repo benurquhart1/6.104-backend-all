@@ -8,6 +8,7 @@ import FavoriteCollection from '../favorite/collection';
 import FriendCollection from '../friend/collection';
 import FollowCollection from '../follow/collection';
 import FeedCollection from '../feed/collection';
+import FollowGroupCollection from '../followGroup/collection';
 
 const router = express.Router();
 
@@ -95,6 +96,7 @@ router.post(
     await FollowCollection.addOne(user._id);
     await FriendCollection.addOne(user._id);
     await FavoriteCollection.addOne(user._id);
+    await FollowGroupCollection.addOne(user._id);
     await FeedCollection.addOne(user._id,"following");
     await FeedCollection.addOne(user._id,"favorites");
     await FeedCollection.addOne(user._id,"friends");
@@ -157,6 +159,7 @@ router.delete(
     await FeedCollection.deleteOne(userId,"following");
     await FeedCollection.deleteOne(userId,"favorites");
     await FeedCollection.deleteOne(userId,"friends");
+    await FollowGroupCollection.deleteOne(userId);
     await FollowCollection.deleteOne(userId);
     await FriendCollection.deleteOne(userId);
     await FavoriteCollection.deleteOne(userId);

@@ -90,6 +90,17 @@ class FeedCollection {
    *
    * @param {Types.ObjectId | string} userId - the id of the user
    * @param {string} name - the name of the feed
+   * @param {string} account - the username of the account who is being added
+   */
+  static async addOneAccountById(userId: Types.ObjectId | string, name:string, accountId: Types.ObjectId | string): Promise<void> {
+    await FeedModel.updateOne({userId:userId,name:name}, {$addToSet: {accounts:accountId}});
+  }
+
+  /**
+   * adds an account to the feed's accounts
+   *
+   * @param {Types.ObjectId | string} userId - the id of the user
+   * @param {string} name - the name of the feed
    * @param {Sort} sort - the new sort of the feed
    */
    static async setSort(userId: Types.ObjectId | string, name:string, sort:Sort): Promise<void> {
@@ -105,6 +116,17 @@ class FeedCollection {
    */
   static async deleteOneAccount(userId: Types.ObjectId | string, name:string, account:string): Promise<void> {
     const accountId = (await UserCollection.findOneByUsername(account))._id;
+    await FeedModel.updateOne({userId:userId,name:name}, {$pull: {accounts:accountId}});
+  }
+
+  /**
+   * removes an account to the feed's accounts
+   *
+   * @param {Types.ObjectId | string} userId - the id of the user
+   * @param {string} name - the name of the feed
+   * @param {string} account - the username of the account who is being added
+   */
+  static async deleteOneAccountById(userId: Types.ObjectId | string, name:string, accountId: Types.ObjectId | string): Promise<void> {
     await FeedModel.updateOne({userId:userId,name:name}, {$pull: {accounts:accountId}});
   }
 

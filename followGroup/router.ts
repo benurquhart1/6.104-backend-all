@@ -1,19 +1,20 @@
 import type {NextFunction, Request, Response} from 'express';
 import express from 'express';
-import FavoriteCollection from './collection';
+import FollowGroupCollection from './collection';
 import * as userValidator from '../user/middleware';
-import * as favoriteValidator from './middleware';
+import * as followGroupValidator from './middleware';
 import * as util from './util';
 import FeedCollection from '../feed/collection';
+import ContentGroupCollection from '../contentGroup/collection';
 
 const router = express.Router();
 
 /**
- * Get a the usernames that a user is favoriteing and favoriteed by
+ * Get a the groups that a user is following
  *
- * @name GET /api/favorite?username=username
+ * @name GET /api/followGroup?username=username
  *
- * @return {FavoriteResponse} - an object containing the usernames that a user is favoriteing and favoriteed by
+ * @return {FollowGroupResponse} - an object containing the usernames that a user is followGrouping and followGrouped by
  * @throws {400} - If username is not given
  * @throws {404} - If no user has given username
  *
@@ -22,65 +23,71 @@ router.get(
   '/',
   userValidator.isUsernameExistsQuery,
   async (req: Request, res: Response) => {
-    const favoriteObject = await FavoriteCollection.findOneByUsername(req.query.username as string);
-    const response = util.constructFavoriteResponse(favoriteObject);
+    const followGroupObject = await FollowGroupCollection.findOneByUsername(req.query.username as string);
+    const response = util.constructFollowGroupResponse(followGroupObject);
     res.status(200).json(response);
   }
 );
 
 /**
- * One user favorites another user
+ * One user followGroups another user
  *
- * @name POST /api/favorite
+ * @name POST /api/followGroup
  *
- * @param {string} username - The username of the account that the user is favoriteing
+ * @param {string} username - The username of the account that the user is followGrouping
  * @return {string} - A success message
  * @throws {403} - If the user is not logged in
  * @throws {400} - If username is not given
  * @throws {404} - If no user has given username
- * @throws {405} - If you already favorite the user
+ * @throws {405} - If you already followGroup the user
  */
 router.post(
   '/',
   [
     userValidator.isUserLoggedIn,
-    userValidator.isUsernameExistsBody,
-    favoriteValidator.isNotFavoriting,
+    // userValidator.isUsernameExistsBody,
+    followGroupValidator.isNotFollowing,
   ],
   async (req: Request, res: Response) => {
-    await FavoriteCollection.addFavoriteByUsername(req.body.username,req.session.userId);
-    await FeedCollection.addOneAccount(req.session.userId,"favorites",req.body.username as string);
+    await FollowGroupCollection.addFollowGroupByName(req.session.userId,req.body.name);
+    await FeedCollection.addOne(req.session.userId,req.body.name);
+    await ContentGroupCollection.addFollowerById(req.body.name,req.session.userId);
+    const group = await ContentGroupCollection.findOne(req.body.name);
+    for (const account of group.accounts) {
+      await FeedCollection.addOneAccountById(req.session.userId,req.body.name,account);
+    }
     res.status(201).json({
-      message: `you are now favoriting ${req.body.username}`
+      message: `you are now following ${req.body.name}`
     });
   }
 );
 
 /**
- * unfavorites another user
+ * unfollowGroups another user
  *
- * @name DELETE /api/favorite/:username
+ * @name DELETE /api/followGroup/:username
  *
  * @return {string} - A success message
  * @throws {403} - If the user is not logged in
  * @throws {400} - If username is not given
  * @throws {404} - If no user has given username
- * @throws {405} - If you already do not favorite the user
+ * @throws {405} - If you already do not followGroup the user
  */
 router.delete(
-  '/:username',
+  '/:name',
   [
     userValidator.isUserLoggedIn,
-    userValidator.isUsernameExistsParams,
-    favoriteValidator.isFavoriting,
+    // userValidator.isUsernameExistsParams,
+    followGroupValidator.isFollowing,
   ],
   async (req: Request, res: Response) => {
-    await FavoriteCollection.deleteFavoriteByUsername(req.params.username,req.session.userId);
-    await FeedCollection.deleteOneAccount(req.session.userId,"favorites",req.params.username as string);
+    await FollowGroupCollection.removeFollowGroupByName(req.session.userId, req.params.name);
+    await FeedCollection.deleteOne(req.session.userId,req.params.name);
+    await ContentGroupCollection.removeFollowerById(req.body.name,req.session.userId);
     res.status(200).json({
-      message: `you are no longer favoriting ${req.params.username}`
+      message: `you are no longer following ${req.params.name}`
     });
   }
 );
 
-export {router as favoriteRouter};
+export {router as followGroupRouter};

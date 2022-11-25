@@ -12,10 +12,10 @@ export type ContentGroup = {
   _id: Types.ObjectId; // MongoDB assigns each object this ID on creation
   name: string;
   description:string;
-  owner:Schema.Types.ObjectId;
-  moderators:Array<Schema.Types.ObjectId>;
-  followers:Array<Schema.Types.ObjectId>;
-  accounts:Array<Schema.Types.ObjectId>;
+  owner:Types.ObjectId;
+  moderators:Array<Types.ObjectId>;
+  followers:Array<Types.ObjectId>;
+  accounts:Array<Types.ObjectId>;
 };
 
 export type PopulatedContentGroup = {

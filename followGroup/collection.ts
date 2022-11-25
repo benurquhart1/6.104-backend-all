@@ -3,6 +3,7 @@ import type {User} from '../user/model';
 import FollowGroupModel, { FollowGroup } from './model';
 import UserModel from '../user/model';
 import UserCollection from '../user/collection';
+import ContentGroupCollection from '../contentGroup/collection';
 
 /**
  * This files contains a class that has the functionality to explore followGroups
@@ -50,23 +51,23 @@ class FollowGroupCollection {
   /**
    * adds a FollowGroup
    *
-   * @param {string} favoritingUsername - the username of the user that is followGroups the other
-   * @param {string} followGrouprId - The id of the user that is being FollowGrouped
+   * @param {Types.ObjectId | string} userId - the Id of the user
+   * @param {string} groupName - the name of the group being followed
    */
-  static async addFollowGroupByUsername(favoritingUsername: string, followGrouprId: Types.ObjectId | string): Promise<void> {
-    const followGroupId = (await UserCollection.findOneByUsername(favoritingUsername))._id
-    await FollowGroupModel.updateOne({userId:followGrouprId},{$addToSet: {followGroups:followGroupId}});
+  static async addFollowGroupByName(userId: Types.ObjectId | string, groupName: string): Promise<void> {
+    const groupId = (await ContentGroupCollection.findOne(groupName))._id
+    await FollowGroupModel.updateOne({userId:userId},{$addToSet: {followGroups:groupId}});
   }
 
   /**
-   * deletes a FollowGroup 
+   * removes a FollowGroup 
    *
-   * @param {string} unfavoritingUsername - the username of the user that is unfollowGroups the other
-   * @param {string} followGrouprId - The id of the user that is being followGrouped
+   * @param {Types.ObjectId | string} userId - the Id of the user
+   * @param {string} groupName - the name of the group being followed
    */
-  static async deleteFollowGroupByUsername(unfavoritingUsername:string, followGrouprId: Types.ObjectId | string): Promise<void> {
-    const unfollowGroupId = (await UserCollection.findOneByUsername(unfavoritingUsername))._id;
-    await FollowGroupModel.updateOne({userId:followGrouprId},{$pull: {followGroups:unfollowGroupId}});
+   static async removeFollowGroupByName(userId: Types.ObjectId | string, groupName: string): Promise<void> {
+    const groupId = (await ContentGroupCollection.findOne(groupName))._id
+    await FollowGroupModel.updateOne({userId:userId},{$pull: {followGroups:groupId}});
   }
 
   /**
@@ -94,21 +95,21 @@ class FollowGroupCollection {
    * @param {string} followGroupId - the id of the account that is checked if followGrouped
    * @param {string} followGrouprId - The id of the user that is being followGrouped
    */
-  static async checkFavoritingById(followGroupId: Types.ObjectId | string, followGrouprId: Types.ObjectId | string): Promise<Boolean> {
-    const favoriting = await FollowGroupModel.findOne({userId: new Types.ObjectId(followGrouprId), followGroups:followGroupId}).exec();
-    return favoriting !== null;
+  static async checkFollowingById(userId: Types.ObjectId | string, followGroupId: Types.ObjectId | string): Promise<Boolean> {
+    const following = await FollowGroupModel.findOne({userId: new Types.ObjectId(userId), followGroups:followGroupId}).exec();
+    return following !== null;
   }  
 
-  /**
-   * deletes a FollowGroup 
-   *
-   * @param {string} favoritingUsername - the username of the user that is unfavoriting the other
-   * @param {string} followGrouprId - The id of the user that is being followGrouped
-   */
-  static async checkFavoritingByUsername(favoritingUsername:string, followGrouprId: Types.ObjectId | string): Promise<Boolean> {
-    const followGroupId = (await UserCollection.findOneByUsername(favoritingUsername))._id;
-    return this.checkFavoritingById(followGroupId,followGrouprId);
-  }
+  // /**
+  //  * deletes a FollowGroup 
+  //  *
+  //  * @param {string} followingUsername - the username of the user that is unfollowing the other
+  //  * @param {string} followGrouprId - The id of the user that is being followGrouped
+  //  */
+  // static async checkFollowingByUsername(followingUsername:string, followGroupId: Types.ObjectId | string): Promise<Boolean> {
+  //   const followGroupId = (await UserCollection.findOneByUsername(followingUsername))._id;
+  //   return this.checkFollowingById(followGroupId,followGroupId);
+  // }
 
   /**
      * delete a followGroup object for a user with a given id
@@ -117,10 +118,10 @@ class FollowGroupCollection {
      */
   static async deleteOne(userId: Types.ObjectId | string): Promise<void> {
     const followGroup = await FollowGroupModel.findOne({userId:userId});
-    const followGroups = followGroup.followGroups;
-    for (const followGroup of followGroups) {
-      this.deleteFollowGroupById(userId,followGroup);
-    }
+    // const followGroups = followGroup.followGroups;
+    // for (const followGroup of followGroups) {
+    //   this.deleteFollowGroupById(userId,followGroup);
+    // }
     followGroup.delete()
   }
 

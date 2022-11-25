@@ -7,6 +7,7 @@ import * as util from './util';
 import FeedCollection from '../feed/collection';
 import ContentGroupModel from './model';
 import UserCollection from '../user/collection';
+import FollowGroupCollection from '../followGroup/collection';
 
 const router = express.Router();
 
@@ -51,7 +52,9 @@ router.post(
   ],
   async (req: Request, res: Response) => {
     const group = await ContentGroupCollection.addOne(req.body.name as string,req.session.userId as string,"");
+    await FollowGroupCollection.addFollowGroupByName(req.session.userId,req.body.name);
     await FeedCollection.addOne(req.session.userId,req.body.name as string);
+    await ContentGroupCollection.addFollowerById(req.body.name as string ,req.session.userId as string);
     res.status(201).json({
       message: `you have successfully created the content group ${req.body.name as string}`,
       contentFroup: util.constructContentGroupResponse(group)
@@ -109,7 +112,7 @@ router.delete(
   '/:name',
   [
     userValidator.isUserLoggedIn,
-    // contentGroupValidator.isNameExistsParams,
+    contentGroupValidator.isNameExistsParams,
     contentGroupValidator.isOwner
   ],
   async (req: Request, res: Response) => {
@@ -119,7 +122,11 @@ router.delete(
     //   await FeedCollection.deleteOne(follower,req.params.name as string);
     //   // await FollowGroupCollection.removeOne()
     // }
-    ContentGroupCollection.deleteOne(req.params.name);
+    for (const follower in group.followers) {
+      await FollowGroupCollection.removeFollowGroupByName(follower,req.params.name);
+      await FeedCollection.deleteOne(follower,req.params.name as string);
+    }
+    await ContentGroupCollection.deleteOne(req.params.name);
     res.status(200).json({
       message: `you have deleted the content group ${req.params.name}`
     });

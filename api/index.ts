@@ -17,6 +17,7 @@ import {friendRouter} from '../friend/router';
 import {feedRouter} from '../feed/router';
 import {likeRouter} from '../like/router';
 import {contentGroupRouter} from '../contentGroup/router';
+import { followGroupRouter } from '../followGroup/router';
 
 // Load environmental variables
 dotenv.config({});
@@ -88,6 +89,7 @@ app.use('/api/favorite', favoriteRouter);
 app.use('/api/feed', feedRouter);
 app.use('/api/like', likeRouter);
 app.use('/api/contentGroup', contentGroupRouter);
+app.use('/api/followGroup', followGroupRouter);
 
 // Catch all the other routes and display error message
 app.all('*', (req: Request, res: Response) => {

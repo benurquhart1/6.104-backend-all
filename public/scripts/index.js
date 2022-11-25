@@ -58,6 +58,9 @@ const formsAndHandlers = {
   'delete-content-group':deleteContentGroup,
   'get-content-group':getContentGroup,
   'update-content-group':updateContentGroup,
+  'follow-group':followGroup,
+  'unfollow-group':unfollowGroup,
+  'view-groups-following':viewGroupsFollowing,
 };
 
 // Attach handlers to forms

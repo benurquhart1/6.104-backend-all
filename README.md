@@ -341,7 +341,7 @@ This renders the `index.html` file that will be used to interact with the backen
 - `403` if the user is not logged in
 - `400` If the username is not given
 - `404` If no user has the given username
-- `405` If the account already follows the user
+- `409` If the account already follows the user
 
 #### `DELETE /api/follow/:username?` - Unfollow another user
 
@@ -354,7 +354,7 @@ This renders the `index.html` file that will be used to interact with the backen
 - `403` if the user is not logged in
 - `400` If the username is not given
 - `404` If no user has the given username
-- `405` If the account does not follow the user
+- `409` If the account does not follow the user
 
 
 #### `GET /api/friend?username=username` - Get the accounts that a user is friends with and are friends with the user
@@ -384,7 +384,7 @@ This renders the `index.html` file that will be used to interact with the backen
 - `403` if the user is not logged in
 - `400` If the username is not given
 - `404` If no user has the given username
-- `405` If the account is already friending the user
+- `409` If the account is already friending the user
 
 #### `DELETE /api/friend/:username?` - Unfriend another user
 
@@ -397,7 +397,7 @@ This renders the `index.html` file that will be used to interact with the backen
 - `403` if the user is not logged in
 - `400` If the username is not given
 - `404` If no user has the given username
-- `405` If the account does not friend the user
+- `409` If the account does not friend the user
 
 #### `GET /api/favorite?username=username` - Get the accounts that a user favorites
 
@@ -425,7 +425,7 @@ This renders the `index.html` file that will be used to interact with the backen
 - `403` if the user is not logged in
 - `400` If the username is not given
 - `404` If no user has the given username
-- `405` If the account already favorite the user
+- `409` If the account already favorite the user
 
 #### `DELETE /api/favorite/:username?` - Unfavorite another user
 
@@ -438,7 +438,7 @@ This renders the `index.html` file that will be used to interact with the backen
 - `403` if the user is not logged in
 - `400` If the username is not given
 - `404` If no user has the given username
-- `405` If the account does not favorite the user
+- `409` If the account does not favorite the user
 
 #### `GET /api/feed?name=name` - Get a feed object with name = name for the user
 
@@ -449,6 +449,7 @@ This renders the `index.html` file that will be used to interact with the backen
 **Throws**
 
 - `403` the user is not logged in
+- `400` the feed name is not given
 - `404` a feed with cannot be found in the users feeds with that name
 
 #### `POST /api/feed` - Create a feed with a given name
@@ -465,9 +466,9 @@ This renders the `index.html` file that will be used to interact with the backen
 
 - `403` the user is not logged in
 - `400` the name is not given
-- `404` The user already has a feed with the given name
+- `409` The user already has a feed with the given name
 
-#### `DELETE /api/favorite/:name` - Delete a feed with a given name
+#### `DELETE /api/feed/:name` - Delete a feed with a given name
 
 **Returns**
 
@@ -479,14 +480,13 @@ This renders the `index.html` file that will be used to interact with the backen
 - `400` the name is not given
 - `404` The user does not have a feed with the given name
 
-#### `PUT /api/favorite/` - updates the feed with name = name for a user
+#### `PUT /api/feed/` - updates the feed with name = name for a user
 
 **Body**
 
 - `name` the name of the feed the user is updating
 - `addAccounts` a list of the accounts to add to the feed
 - `removeAccounts` a list of the accounts to remove from the feed
-
 
 **Returns**
 
@@ -497,3 +497,150 @@ This renders the `index.html` file that will be used to interact with the backen
 - `403` the user is not logged in
 - `400` the name is not given
 - `404` The user does not have a feed with the given name
+
+
+#### `GET /api/like?freetId=freetId` - Get the likes of a freet with the given id
+
+**Returns**
+
+- A like response to be used in the frontend
+
+**Throws**
+
+- `403` the user is not logged in
+- `400` the freet id is not given
+- `404` a freet with that id cannot be found
+
+#### `POST /api/like` - Like a post with a given id
+
+**Body**
+
+- `freetId` the id of the freet you are liking
+
+**Returns**
+
+- a success message
+
+**Throws**
+
+- `403` the user is not logged in
+- `400` the freet id is not given
+- `404` a freet with that id cannot be found
+- `409` the user already likes the freet
+
+#### `DELETE /api/like/:freetId` - Delete a like for a freet with the given id
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` the user is not logged in
+- `400` the freet id is not given
+- `404` a freet with that id cannot be found
+- `409` the user does not already like the freet
+
+#### `GET /api/contentGroup?name=name` - Get a content group with the given name
+
+**Returns**
+
+- A content group response to be used in the frontend
+
+**Throws**
+
+- `403` the user is not logged in
+- `400` the content group name is not given
+- `404` a content group cannot be found with the given name
+
+#### `POST /api/contentGroup` - Create a content group
+
+**Body**
+
+- `name` the name of the content group
+
+**Returns**
+
+- a content group response for the frontend
+
+**Throws**
+
+- `403` the user is not logged in
+- `400` the name is not given
+- `409` a content group already exists with the given name
+
+#### `DELETE /api/contentGroup/:name` - Delete a content group with a given name
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` the user is not logged in
+- `400` the name is not given
+- `404` a content group with the given name cannot be found
+- `403` the user is not the owner of the content group
+
+#### `PUT /api/contentGroup/` - updates the feed with name = name for a user
+
+**Body**
+
+- `name` the name of the content group the user is updating
+- `addAccount` the account to add to the content group
+- `removeAccount` the account to remove from the content group
+- `addModerator` the moderator to add to the content group
+- `removeModerator` the moderator to remove from the content group
+
+**Returns**
+
+- the updated content group
+
+**Throws**
+
+- `403` the user is not logged in
+- `400` the name is not given
+- `404` a content group with the given name cannot be found
+- `403` the user is not a moderator of the content group
+
+
+#### `GET /api/followGroup?username=username` - Get the content groups that a user follows
+
+**Returns**
+
+- An array of content groups the user follows
+
+**Throws**
+
+- `400` if `username` is not given
+- `404` if a content group with `username` cannot be found
+
+#### `POST /api/followGroup` - Follow a content group
+
+**Body**
+
+- `name` the name of the group you are following
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `400` If the name is not given
+- `404` If no content group has the given name
+- `409` If the user already follows the content group
+
+#### `DELETE /api/followGroup/:name?` - Unfollow a content group
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `400` If the username is not given
+- `404` If no content group has the given name
+- `409` If the user does not follow the content group

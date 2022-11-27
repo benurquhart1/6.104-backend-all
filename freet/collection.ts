@@ -3,8 +3,8 @@ import type {Freet} from './model';
 import FreetModel from './model';
 import UserCollection from '../user/collection';
 import { Sort } from '../feed/model';
-import LikeModel from 'like/model';
-import LikeCollection from 'like/collection';
+import LikeModel from '../like/model';
+import LikeCollection from '../like/collection';
 import * as util from './util';
 
 /**

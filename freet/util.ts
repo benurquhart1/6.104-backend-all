@@ -1,7 +1,7 @@
 import type {HydratedDocument} from 'mongoose';
 import moment from 'moment';
 import type {Freet, PopulatedFreet} from '../freet/model';
-import { Sort } from 'feed/model';
+import { Sort } from '../feed/model';
 import LikeCollection from '../like/collection';
 
 // Update this if you add a property to the Freet type!

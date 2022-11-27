@@ -55,9 +55,9 @@ const isNameExistsQuery = async (req: Request, res: Response, next: NextFunction
 const isNotNameExists = async (req: Request, res: Response, next: NextFunction) => {
   const feed = await FeedCollection.findOne(req.session.userId,req.body.name);
   if (feed) {
-    res.status(404).json({
+    res.status(409).json({
       error: {
-        feedNotFound: `the feed with name ${req.body.name} cannot be found`
+        feedNotFound: `the feed with name ${req.body.name} already exists`
       }
     });
     return;

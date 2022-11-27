@@ -1,6 +1,6 @@
 import type {Types} from 'mongoose';
 import {Schema, model} from 'mongoose';
-import { User } from 'user/model';
+import { User } from '../user/model';
 
 /**
  * This file defines the properties stored in a content group

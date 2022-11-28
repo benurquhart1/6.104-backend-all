@@ -10,9 +10,7 @@ const hasLiked = async (req: Request, res: Response, next: NextFunction) => {
   const like = validFormat ? await LikeCollection.hasLiked(req.params.freetId,req.session.userId as string) : '';
   if (!like) {
     res.status(409).json({
-      error: {
-        LikeNotFound: `The user has not liked the freet`
-      }
+      error:`You have not liked the freet`
     });
     return;
   }
@@ -28,9 +26,7 @@ const hasNotLiked = async (req: Request, res: Response, next: NextFunction) => {
   const like = validFormat ? await LikeCollection.hasLiked(req.body.freetId,req.session.userId as string) : '';
   if (like) {
     res.status(409).json({
-      error: {
-        LikeFound: `The user has already liked the freet`
-      }
+      error:`You have already liked the freet`
     });
     return;
   }

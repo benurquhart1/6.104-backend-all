@@ -16,9 +16,7 @@ const isNameNotAlreadyInUse = async (req: Request, res: Response, next: NextFunc
     return;
   }
   res.status(409).json({
-    error: {
-      nameInUse: 'The group name is already in use'
-    }
+    error: 'The group name is already in use'
   });
 };
 
@@ -33,9 +31,7 @@ const isUsernameNotAlreadyInUse = async (req: Request, res: Response, next: Next
   }
 
   res.status(409).json({
-    error: {
-      username: 'An account with this username already exists.'
-    }
+    error: 'An account with this username already exists.'
   });
 };
 
@@ -90,9 +86,7 @@ const isModerator = async (req: Request, res: Response, next: NextFunction) => {
   const result = ContentGroupCollection.isModerator(req.params.name,req.session.userId);
   if (!result) {
     res.status(403).json({
-      error: {
-        notModerator: `You are not a moderator for the group`
-      }
+      error: `You are not a moderator for the group`
     });
     return;
   }
@@ -106,9 +100,8 @@ const isModerator = async (req: Request, res: Response, next: NextFunction) => {
   const result = ContentGroupCollection.isOwner(req.params.name,req.session.userId);
   if (!result) {
     res.status(403).json({
-      error: {
-        notOwner: `You are not the owner of the group`
-      }
+      error: `You are not the owner of the group`
+      
     });
     return;
   }

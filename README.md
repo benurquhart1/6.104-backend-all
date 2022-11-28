@@ -602,6 +602,11 @@ This renders the `index.html` file that will be used to interact with the backen
 - `400` the name is not given
 - `404` a content group with the given name cannot be found
 - `403` the user is not a moderator of the content group
+- `404` the user with the given id cannot be found for any of the given fields
+- `404` `addAccount` is given, but is not the username of an existing account
+- `404` `removeAccount` is given, but is not the username of an existing account
+- `404` `addModerator` is given, but is not the username of an existing account
+- `404` `removeModerator` is given, but is not the username of an existing account
 
 
 #### `GET /api/followGroup?username=username` - Get the content groups that a user follows

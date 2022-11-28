@@ -176,6 +176,19 @@ const isUserLoggedOut = (req: Request, res: Response, next: NextFunction) => {
 };
 
 /**
+ * Checks if a username in req.body is valid, that is, it matches the username regex
+ */
+const isBirthdayGiven = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.body.birthday) {
+    res.status(404).json({
+      error: 'birthday is not given'
+    });
+    return;
+  }
+  next();
+};
+
+/**
  * Checks if a user with userId as author id in req.query exists
  */
 const isAuthorExists = async (req: Request, res: Response, next: NextFunction) => {
@@ -209,5 +222,6 @@ export {
   // isUsernameExists,
   isUsernameExistsBody,
   isUsernameExistsQuery,
-  isUsernameExistsParams
+  isUsernameExistsParams,
+  isBirthdayGiven
 };

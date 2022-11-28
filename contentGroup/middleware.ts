@@ -45,7 +45,7 @@ const isUsernameNotAlreadyInUse = async (req: Request, res: Response, next: Next
  * Checks if a name exists
  * helper function for other methods that are specific to the location of the username
  */
- const isNameExists = async (name: string, res: Response, next: NextFunction) => {
+const isNameExists = async (name: string, res: Response, next: NextFunction) => {
   if (!name) {
     res.status(400).json({
       error: 'Provided username must be nonempty.'
@@ -115,6 +115,70 @@ const isModerator = async (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
+/**
+ * Checks if the account one is trying to add to a content group exists
+ */
+const isAccountExistsAdd = async (req:Request, res: Response, next: NextFunction) => {
+  if (req.body.addAccount) {
+    const account = await UserCollection.findOneByUsername(req.body.addAccount as string);
+    if (!account) {
+      res.status(404).json({
+        error: `The account you are trying to add to the content group does not exist`
+      });
+      return;
+    }
+  }
+  next();
+};
+
+/**
+ * Checks if the account one is trying to remove from a content group exists
+ */
+ const isAccountExistsRemove = async (req:Request, res: Response, next: NextFunction) => {
+  if (req.body.removeAccount) {
+    const account = await UserCollection.findOneByUsername(req.body.removeAccount as string);
+    if (!account) {
+      res.status(404).json({
+        error: `The account you are trying to remove to the content group does not exist`
+      });
+      return;
+    }
+  }
+  next();
+};
+
+/**
+ * Checks if the moderator one is trying to add to a content group exists
+ */
+const isModeratorExistsAdd = async (req:Request, res: Response, next: NextFunction) => {
+  if (req.body.addModerator) {
+    const moderator = await UserCollection.findOneByUsername(req.body.addModerator as string);
+    if (!moderator) {
+      res.status(404).json({
+        error: `The moderator you are trying to add to the content group does not exist`
+      });
+      return;
+    }
+  }
+  next();
+};
+
+/**
+ * Checks if the moderator one is trying to remove from a content group exists
+ */
+const isModeratorExistsRemove = async (req:Request, res: Response, next: NextFunction) => {
+  if (req.body.removeModerator) {
+    const moderator = await UserCollection.findOneByUsername(req.body.removeModerator as string);
+    if (!moderator) {
+      res.status(404).json({
+        error: `The moderator you are trying to remove to the content group does not exist`
+      });
+      return;
+    }
+  }
+  next();
+};
+
 export {
   isNameNotAlreadyInUse,
   isNameExistsBody,
@@ -122,4 +186,8 @@ export {
   isNameExistsQuery,
   isModerator,
   isOwner,
+  isAccountExistsAdd,
+  isAccountExistsRemove,
+  isModeratorExistsAdd,
+  isModeratorExistsRemove,
 };
